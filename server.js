@@ -32,7 +32,9 @@ var CSPHeader = {
 
 			`connect-src ${[
 				"'none'",
-			].join(" ")};`
+			].join(" ")};`,
+
+			`worker-src 'self';`
 		].join(" ")
 };
 
@@ -143,7 +145,7 @@ async function onRequest(req,res) {
 		// check if the request url is using "auth-worker.js"
 		// when I just looked for "auth-worker.js" it didn't seem to actually find the url
 		if (req.url == "/js/auth-worker.js") {
-			res.writeHead(200, {
+			return serveFile(req.url,200,{
 				...HSTSHeader,
 				"Content-Security-Policy":
 			[
@@ -160,14 +162,18 @@ async function onRequest(req,res) {
 					"'self'",
 					"wasm-unsafe-eval",
 				].join(" ")};`,
-			].join(" ") }
-			)
+
+				`worker-src 'self';`,
+			].join(" ") },req,res);
 		}
 
 		// handle all other static files
 		staticServer.serve(req,res,async function onStaticComplete(err){
 			if (err) {
-				try {
+				var acceptsHtml = /(?:^|,)\s*text\/html(?:\s*;[^,]*)?(?:,|$)/i.test(req.headers.accept || "");
+				var isNavigation = req.headers["sec-fetch-mode"] === "navigate" ||
+					(req.headers["sec-fetch-dest"] === "document" && acceptsHtml);
+				if (isNavigation || acceptsHtml && !path.extname(req.url.split(/[?#]/)[0])) try {
 					return await serveFile("/index.html",200,{
 						...HSTSHeader,
 						...CSPHeader,

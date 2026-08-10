@@ -5,25 +5,27 @@
 <title>YOU .</title>
 
 <meta name="viewport" content="width=device-width">
-<meta name=”robots” content="index, follow">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#000000">
 <meta name="author" content="Anonymous">
 <meta itemprop="name" content="You.">
 <meta itemprop="description" content="You. -- The privacy-first period-tracking app">
-<meta itemprop="image" content="https://youperiod.app/images/logo-social-small.png">
+<meta itemprop="image" content="https://youperiod.app/icons/app-icon-512.svg">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="You.">
 <meta name="twitter:description" content="You. -- The privacy-first period-tracking app">
-<meta name="twitter:image" content="https://youperiod.app/images/logo-social-small.png">
+<meta name="twitter:image" content="https://youperiod.app/icons/app-icon-512.svg">
 <meta name="twitter:image:alt" content="You. App">
 <meta name="title" property="og:title" content="You.">
 <meta name="description" property="og:description" content="You. -- The privacy-first period-tracking app">
-<meta name="image" property="og:image" content="https://youperiod.app/images/logo-social-large.png">
+<meta name="image" property="og:image" content="https://youperiod.app/icons/app-icon-512.svg">
 <meta name="url" property="og:url" content="https://youperiod.app/">
 <meta name="site_name" property="og:site_name" content="You.">
 <meta name="type" property="og:type" content="website">
 
 <link rel="canonical" href="https://youperiod.app/" />
-<link rel="icon" type="image/x-icon" href="/favicon.ico" />
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" type="image/svg+xml" href="/icons/app-icon.svg" />
 <link rel="stylesheet" href="css/style.css">
 <script integrity="sha256-CoCYJ/tTxH9vJyISOUlowiGKF8OokDL5QBuS3H8R1/g=">
 // compute the vw/vh units more reliably than CSS does itself
@@ -58,7 +60,7 @@ if (document.documentElement && document.documentElement.style && document.docum
 
 <hr>
 
-<p>Development/testing mode... DO NOT ACTUALLY USE YET!</p>
+<p class="privacy-note">Your entries stay on this device and are encrypted before storage. Predictions are estimates only—not contraception or medical advice.</p>
 
 <hr>
 
@@ -73,10 +75,10 @@ if (document.documentElement && document.documentElement.style && document.docum
 		<label for="register-password">To protect your information on this device, please choose a secret phrase (several words together that uniquely you will remember), separated by spaces, hyphens, punctuation, numbers, etc:</label>
 	</p>
 	<p>
-		<input type="password" id="register-password" size="30" placeholder="set secret phrase" autocomplete="phrase">
+<input type="password" id="register-password" size="30" placeholder="set secret phrase" autocomplete="new-password">
 	</p>
 	<p>
-		<input type="password" id="register-password-confirm" size="30" placeholder="confirm secret phrase" autocomplete="phrase">
+<input type="password" id="register-password-confirm" size="30" placeholder="confirm secret phrase" autocomplete="new-password">
 	</p>
 	<p>
 		<button type="submit" disabled>Create Local Profile</button>
@@ -125,15 +127,17 @@ if (document.documentElement && document.documentElement.style && document.docum
 		Profile: <strong><span id="profile-label"></span></strong>
 		<button type="button" id="delete-profile-btn">Delete Local Profile</button>
 	</p>
+	<section id="prediction" aria-live="polite">
+		<h3>Next period estimate</h3>
+		<p id="prediction-result">Record at least two period starts to see an estimate.</p>
+	</section>
+	<p><label for="period-start">Period start date:</label> <input type="date" id="period-start" required></p>
+	<p><label for="period-end">Period end date (optional):</label> <input type="date" id="period-end"></p>
+	<p><label><input type="checkbox" id="period-exceptional"> Mark as an exceptional cycle</label></p>
 	<p>
-		<label for="saved-text">Enter anything you'd like to save (secure and private, on this device only):</label>
+		<button type="submit" disabled>Save period</button>
 	</p>
-	<p>
-		<textarea id="saved-text" cols="60" rows="8"></textarea>
-	</p>
-	<p>
-		<button type="submit" disabled>Save</button>
-	</p>
+	<ul id="period-list"></ul>
 </form>
 
 <form id="change-secure-passphrase" class="hidden" inert>
@@ -161,10 +165,10 @@ if (document.documentElement && document.documentElement.style && document.docum
 
 <footer>&copy;2022 YOU<i class="bold-period" aria-label="stylized period in red color"></i></footer>
 
-<div id="notification-banner" class="hidden">
+<div id="notification-banner" class="hidden" role="dialog" aria-modal="true" aria-labelledby="notification-message">
 	<form>
-		<div class="msg" aria-live="off" aria-atomic="true"></div>
-		<button type="button" class="cancel-btn" class="hidden">Cancel</button>
+		<div id="notification-message" class="msg" aria-live="polite" aria-atomic="true"></div>
+<button type="button" class="cancel-btn hidden">Cancel</button>
 		<button type="submit">OK</button>
 	</form>
 </div>
@@ -176,6 +180,7 @@ if (document.documentElement && document.documentElement.style && document.docum
 <script src="js/util.js"></script>
 <script type="module" src="js/main.js"></script>
 <script type="module" src="js/window-resize.js"></script>
+<script src="js/register-sw.js" defer></script>
 
 </body>
 </html>

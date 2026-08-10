@@ -13,7 +13,7 @@ const aesDefaultOptions = {
 async function getData(accountID,keyText) {
 	try {
 		accountID = accountID || sessionStorage.getItem("current-account-id");
-		keyText = keyText || sessionStorage.getItem("current-key-text");
+		if (!keyText) return;
 		let accounts = await idbKeyval.get("accounts");
 		let account = accounts[accountID];
 
@@ -35,7 +35,7 @@ async function getData(accountID,keyText) {
 async function saveData(data,accountID,keyText,resaveWithNewCredentials = false) {
 	try {
 		accountID = accountID || sessionStorage.getItem("current-account-id");
-		keyText = keyText || sessionStorage.getItem("current-key-text");
+		if (!keyText) return false;
 		let accounts = await idbKeyval.get("accounts");
 		let account = accounts[accountID];
 

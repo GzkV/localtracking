@@ -2,28 +2,31 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Privacy Policy</title>
+<title>Privacy Policy | YOU.</title>
 
 <meta name="viewport" content="width=device-width">
-<meta name=”robots” content="index, follow">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#000000">
 <meta name="author" content="Anonymous">
-<meta itemprop="name" content="About You.">
-<meta itemprop="description" content="About You. -- The privacy-first period-tracking app">
-<meta itemprop="image" content="https://youperiod.app/images/logo-social-small.png">
+<meta name="description" content="The privacy policy for YOU., the privacy-first period-tracking app.">
+<meta itemprop="name" content="YOU. Privacy Policy">
+<meta itemprop="description" content="The privacy policy for YOU., the privacy-first period-tracking app.">
+<meta itemprop="image" content="https://youperiod.app/icons/app-icon-512.svg">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="About You.">
-<meta name="twitter:description" content="About You. -- The privacy-first period-tracking app">
-<meta name="twitter:image" content="https://youperiod.app/images/logo-social-small.png">
+<meta name="twitter:title" content="Privacy Policy | YOU.">
+<meta name="twitter:description" content="The privacy policy for YOU., the privacy-first period-tracking app.">
+<meta name="twitter:image" content="https://youperiod.app/icons/app-icon-512.svg">
 <meta name="twitter:image:alt" content="You. App">
-<meta name="title" property="og:title" content="About You.">
-<meta name="description" property="og:description" content="About You. -- The privacy-first period-tracking app">
-<meta name="image" property="og:image" content="https://youperiod.app/images/logo-social-large.png">
-<meta name="url" property="og:url" content="https://youperiod.app/">
+<meta name="title" property="og:title" content="Privacy Policy | YOU.">
+<meta name="description" property="og:description" content="The privacy policy for YOU., the privacy-first period-tracking app.">
+<meta name="image" property="og:image" content="https://youperiod.app/icons/app-icon-512.svg">
+<meta name="url" property="og:url" content="https://youperiod.app/privacy.html">
 <meta name="site_name" property="og:site_name" content="You.">
 <meta name="type" property="og:type" content="website">
 
-<link rel="canonical" href="https://youperiod.app/about.html" />
-<link rel="icon" type="image/x-icon" href="/favicon.ico" />
+<link rel="canonical" href="https://youperiod.app/privacy.html" />
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" type="image/svg+xml" href="/icons/app-icon.svg" />
 <link rel="stylesheet" href="css/style.css">
 <script integrity="sha256-CoCYJ/tTxH9vJyISOUlowiGKF8OokDL5QBuS3H8R1/g=">
 // compute the vw/vh units more reliably than CSS does itself
@@ -81,10 +84,10 @@ if (document.documentElement && document.documentElement.style && document.docum
 
 <footer>&copy;2022 YOU<i class="bold-period" aria-label="stylized period in red color"></i></footer>
 
-<div id="notification-banner" class="hidden">
+<div id="notification-banner" class="hidden" role="dialog" aria-modal="true" aria-labelledby="notification-message">
 	<form>
-		<div class="msg" aria-live="off" aria-atomic="true"></div>
-		<button type="button" class="cancel-btn" class="hidden">Cancel</button>
+		<div id="notification-message" class="msg" aria-live="polite" aria-atomic="true"></div>
+<button type="button" class="cancel-btn hidden">Cancel</button>
 		<button type="submit">OK</button>
 	</form>
 </div>
@@ -93,6 +96,7 @@ if (document.documentElement && document.documentElement.style && document.docum
 <!----------------------------------->
 
 <script type="module" src="js/window-resize.js"></script>
+<script src="js/register-sw.js" defer></script>
 
 </body>
 </html>

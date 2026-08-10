@@ -3,6 +3,7 @@ import * as DataManager from "/js/data-manager.js";
 import * as NotificationManager from "/js/notification-manager.js";
 import { MINIMUM_FEATURES_SUPPORTED } from "/js/browser-support.js";
 import * as RandomPhrase from "/js/passphrase/random-phrase.js";
+import * as PeriodPrediction from "/js/period-prediction.js";
 
 const UNSET = Symbol("unset");
 var createProfileFormEl;
@@ -14,6 +15,8 @@ var profileNameSelectorEl;
 var profileLabelEl;
 var authWorker;
 var tmpDataBackup = UNSET;
+var currentKeyText;
+var periodData = { version: 1, cycles: [], };
 
 document.addEventListener("DOMContentLoaded",() => main().catch(console.log),false);
 
@@ -70,7 +73,7 @@ async function main() {
 	}
 	else {
 		let accountID = sessionStorage.getItem("current-account-id");
-		let keyText = sessionStorage.getItem("current-key-text");
+		let keyText = currentKeyText;
 
 		// already logged in?
 		if (accountID && keyText) {
@@ -159,11 +162,15 @@ async function populateSavedData() {
 		profileLabelEl.innerText = account.profileName;
 	}
 
-	setSavedData: {
-		let textareaEl = savedDataFormEl.querySelector("#saved-text");
-		let data = await DataManager.getData();
-		textareaEl.value = (data != null) ? data : "";
+	let data = await DataManager.getData(undefined,currentKeyText);
+	try {
+		let parsed = data ? JSON.parse(data) : null;
+		periodData = parsed && Array.isArray(parsed.cycles) ? parsed : { version: 1, cycles: [], };
 	}
+	catch (err) {
+		periodData = { version: 1, cycles: [], };
+	}
+	renderPeriods();
 }
 
 async function onSuggestPassphrase(evt) {
@@ -269,6 +276,7 @@ async function onLogout(evt = false) {
 	loginFormEl.reset();
 	savedDataFormEl.reset();
 	profileLabelEl.innerText = "";
+	currentKeyText = undefined;
 	sessionStorage.clear();
 	location.reload();
 }
@@ -283,11 +291,24 @@ async function onSaveData(evt) {
 		submitBtn.disabled
 	)) {
 		submitBtn.disabled = true;
-		let textareaEl = savedDataFormEl.querySelector("#saved-text");
+		let startEl = savedDataFormEl.querySelector("#period-start");
+		let endEl = savedDataFormEl.querySelector("#period-end");
+		if (!startEl.value || (endEl.value && endEl.value < startEl.value)) {
+			warn("Please enter a valid period start and end date.");
+			submitBtn.disabled = false;
+			return;
+		}
+		periodData.cycles = periodData.cycles.filter(cycle => cycle.start !== startEl.value);
+		periodData.cycles.push({ start: startEl.value, end: endEl.value || null, exceptional: savedDataFormEl.querySelector("#period-exceptional").checked, });
+		periodData.cycles.sort((a,b) => a.start.localeCompare(b.start));
 		try {
-			let res = await DataManager.saveData(textareaEl.value);
+			let res = await DataManager.saveData(JSON.stringify(periodData),undefined,currentKeyText);
 			if (res) {
-				notify("Data saved (encrypted) successfully.");
+				startEl.value = "";
+				endEl.value = "";
+				savedDataFormEl.querySelector("#period-exceptional").checked = false;
+				renderPeriods();
+				notify("Period saved (encrypted) successfully.");
 			}
 			else {
 				throw res;
@@ -299,6 +320,19 @@ async function onSaveData(evt) {
 		}
 
 		submitBtn.disabled = false;
+	}
+}
+
+function renderPeriods() {
+	let resultEl = savedDataFormEl.querySelector("#prediction-result");
+	let listEl = savedDataFormEl.querySelector("#period-list");
+	let prediction = PeriodPrediction.predict(periodData.cycles);
+	resultEl.innerText = prediction.available ? `${prediction.date} (typical cycle ${prediction.typical} days; likely range ${prediction.min}–${prediction.max} days; ${prediction.confidence} confidence). Historical median absolute error: about ${prediction.error} days.` : "Record at least two non-exceptional period starts to see an estimate.";
+	listEl.innerHTML = "";
+	for (let cycle of periodData.cycles.slice().reverse()) {
+		let item = document.createElement("li");
+		item.innerText = `${cycle.start}${cycle.end ? " to " + cycle.end : ""}${cycle.exceptional ? " (exceptional)" : ""}`;
+		listEl.appendChild(item);
 	}
 }
 
@@ -569,7 +603,7 @@ async function onAuthMessage({ data }) {
 
 		// need to save credentials into session?
 		sessionStorage.setItem("current-account-id",data.accountID);
-		sessionStorage.setItem("current-key-text",data.keyText);
+		currentKeyText = data.keyText;
 
 		// passphrase credentials changed?
 		let credentialsChanged = (

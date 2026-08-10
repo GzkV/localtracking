@@ -33,10 +33,24 @@ button {
 	cursor: pointer;
 }
 
+:focus-visible {
+	outline: 3px solid rgba(var(--color-red-1));
+	outline-offset: 3px;
+}
+
 form input[type=text],
 form input[type=password],
+form input[type=date],
 form textarea {
 	max-width: calc(var(--vw-unit) * 75);
+}
+
+.privacy-note, #prediction {
+	padding: 0.7em;
+	border-left: 0.25em solid rgba(var(--color-red-1));
+}
+#prediction {
+	background: rgba(var(--color-gray-1));
 }
 
 main[inert],

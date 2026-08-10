@@ -23,7 +23,8 @@ function sessionStorageSupported() {
 
 function webCryptoSupported() {
 	return "crypto" in window
-		&& typeof window.crypto.randomUUID === "function";
+		&& window.crypto.subtle
+		&& typeof window.crypto.getRandomValues === "function";
 }
 
 function textEncodeDecodeSupported() {
@@ -51,13 +52,10 @@ function getUserMediaSupported() {
 
 const MINIMUM_FEATURES_SUPPORTED = (
 	webAssemblySupported()
-	&& serviceWorkersSupported()
 	&& webWorkersSupported()
 	&& indexedDbSupported()
-	&& sessionStorageSupported()
 	&& webCryptoSupported()
 	&& textEncodeDecodeSupported()
-	&& storageManagerPersistSupported()
 );
 
 const OPTIONAL_FEATURES_SUPPORTED = (
