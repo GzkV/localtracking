@@ -27,7 +27,7 @@
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="icon" type="image/png" href="/icons/howling-wolf-app-icon.png" />
 <link rel="stylesheet" href="css/style.css">
-<script integrity="sha256-CoCYJ/tTxH9vJyISOUlowiGKF8OokDL5QBuS3H8R1/g=">
+<script integrity="sha256-3eEyXcXnNEW9IQdOOEAJNSpjMExr1rxCvVdVzPyJAeE=">
 // compute the vw/vh units more reliably than CSS does itself
 if (document.documentElement && document.documentElement.style && document.documentElement.style.setProperty) {
 	let docEl = document.documentElement;
@@ -36,6 +36,16 @@ if (document.documentElement && document.documentElement.style && document.docum
 	docEl.style.setProperty("--vw-unit",`${(width / 100).toFixed(1)}px`);
 	docEl.style.setProperty("--vh-unit",`${(height / 100).toFixed(1)}px`);
 }
+window.addEventListener("error",evt => {
+	console.error("[Moon.Time] resource/runtime error",{
+		message: evt.message,
+		filename: evt.filename,
+		lineno: evt.lineno,
+	});
+},true);
+window.addEventListener("unhandledrejection",evt => {
+	console.error("[Moon.Time] unhandled promise rejection",evt.reason);
+});
 </script>
 </head>
 <body>
@@ -177,6 +187,11 @@ if (document.documentElement && document.documentElement.style && document.docum
 		<p>
 			<button type="submit" class="btn-primary" disabled>Save period</button>
 		</p>
+		<div class="today-dose-log">
+			<h4>Medication runes</h4>
+			<p class="privacy-note">Tap a paw to mark a scheduled dose taken today.</p>
+			<div id="today-medication-log" class="dose-grid"></div>
+		</div>
 	</section>
 
 	<section id="prediction" class="view-card prediction-card" aria-live="polite">
@@ -215,9 +230,9 @@ if (document.documentElement && document.documentElement.style && document.docum
 		</div>
 		<ul class="calendar-legend">
 			<li><img src="/assets/blood-drop-icon-cyan-pink.png" alt="" aria-hidden="true"> Period day</li>
-			<li><img src="/assets/moon-phase-icon-cyan-glow.png" alt="" aria-hidden="true"> Predicted window</li>
+			<li><img class="projected-period-icon" src="/assets/blood-drop-icon-purple-dark.png" alt="" aria-hidden="true"> Projected period</li>
 			<li><img src="/assets/moon-icon-full-cyan.png" alt="" aria-hidden="true"> Est. ovulation</li>
-			<li><img src="/assets/potion-drop-icon-peach-purple.png" alt="" aria-hidden="true"> Medication dose</li>
+			<li><img src="/assets/calendar-paw-icon.png" alt="" aria-hidden="true"> Medication dose</li>
 		</ul>
 		<p class="privacy-note">Predictions are estimates only — not contraception or medical advice. Confidence reflects how much consistent history is available.</p>
 	</section>

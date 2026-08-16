@@ -5,6 +5,7 @@ import { MINIMUM_FEATURES_SUPPORTED, storageManagerPersistSupported } from "/js/
 import * as RandomPhrase from "/js/passphrase/random-phrase.js";
 import * as PeriodPrediction from "/js/period-prediction.js";
 
+const b64AB = window["base64-arraybuffer"];
 const UNSET = Symbol("unset");
 const UAT_MODE = (
 	new URLSearchParams(window.location.search).get("uat") === "1" &&
@@ -24,14 +25,27 @@ var tmpDataBackup = UNSET;
 var currentKeyText;
 var pendingBackup;
 var periodData = { version: 2, cycles: [], medications: [], reminders: { medicationTimes: {}, periodDaysBefore: null, }, };
+var calendarMonth = new Date(new Date().getFullYear(),new Date().getMonth(),1);
 
-document.addEventListener("DOMContentLoaded",() => main().catch(console.log),false);
+document.addEventListener("DOMContentLoaded",() => main().catch(err => {
+	console.error("[Moon.Time] startup failed; interactive controls may remain hidden/inert",err);
+}),false);
 
 
 // ****************************
 
 async function main() {
 	var bodyEl = document.querySelector("body");
+	console.info("[Moon.Time] startup",{
+		url: window.location.href,
+		hostname: window.location.hostname,
+		uatMode: UAT_MODE,
+		minimumFeaturesSupported: MINIMUM_FEATURES_SUPPORTED,
+		secureContext: window.isSecureContext,
+		indexedDB: "indexedDB" in window,
+		webCryptoSubtle: Boolean(window.crypto && window.crypto.subtle),
+		worker: "Worker" in window,
+	});
 	createProfileFormEl = document.getElementById("create-profile");
 	passphraseSuggestionFormEl = document.getElementById("generate-passphrase-suggestion");
 	loginFormEl = document.getElementById("login");
@@ -42,6 +56,13 @@ async function main() {
 	profileLabelEl = document.getElementById("profile-label");
 
 	NotificationManager.init(bodyEl);
+	console.info("[Moon.Time] controls initialized",{
+		createProfileForm: Boolean(createProfileFormEl),
+		loginForm: Boolean(loginFormEl),
+		savedDataForm: Boolean(savedDataFormEl),
+		changePassphraseForm: Boolean(changePassphraseFormEl),
+		restoreBackupForm: Boolean(restoreBackupFormEl),
+	});
 
 	if (!MINIMUM_FEATURES_SUPPORTED) {
 		showUnsupportedBrowserPage();
@@ -70,8 +91,11 @@ async function main() {
 		document.getElementById("save-medication-btn").addEventListener("click",onSaveMedication,false);
 		document.getElementById("cancel-medication-btn").addEventListener("click",resetMedicationEditor,false);
 		document.getElementById("medication-list").addEventListener("click",onMedicationAction,false);
+		document.getElementById("today-medication-log").addEventListener("click",onMedicationAction,false);
 		document.getElementById("period-reminder-days").addEventListener("change",onReminderSettingsChange,false);
 		document.getElementById("request-notification-btn").addEventListener("click",onRequestNotifications,false);
+		document.querySelector('[data-calendar="prev"]').addEventListener("click",() => changeCalendarMonth(-1),false);
+		document.querySelector('[data-calendar="next"]').addEventListener("click",() => changeCalendarMonth(1),false);
 	}
 
 	authWorker = new Worker("/js/auth-worker.js");
@@ -82,10 +106,16 @@ async function main() {
 		let profiles = await getProfiles();
 		populateProfileSelector(profiles);
 		document.getElementById("uat-login-note").classList.toggle("hidden",!UAT_MODE);
+		console.info("[Moon.Time] profiles loaded",{
+			profileCount: Object.keys(profiles).length,
+			profileNames: Object.keys(profiles),
+			uatAccountPresent: Boolean(profiles.Testing === UAT_ACCOUNT_ID),
+		});
 	}
 
 	// no registered login(s) yet?
 	if (profileNameSelectorEl.options.length == 0) {
+		console.info("[Moon.Time] showing registration page");
 		showRegistrationPage();
 	}
 	else {
@@ -93,10 +123,12 @@ async function main() {
 		let keyText = currentKeyText;
 
 		// already logged in?
-	if (accountID && keyText) {
+		if (accountID && keyText) {
+			console.info("[Moon.Time] restoring saved-data page from session");
 			await showSavedDataPage();
 		}
 		else {
+			console.info("[Moon.Time] showing login page");
 			showLoginPage();
 		}
 	}
@@ -214,6 +246,9 @@ async function populateSavedData() {
 	}
 	renderPeriods();
 	renderMedications();
+	renderTodayMedicationLog();
+	calendarMonth = new Date(new Date().getFullYear(),new Date().getMonth(),1);
+	renderCalendar();
 	if (needsMigration) await DataManager.saveData(JSON.stringify(periodData),undefined,currentKeyText);
 	NotificationManager.scheduleReminders(periodData,PeriodPrediction.predict(periodData.cycles));
 }
@@ -427,7 +462,8 @@ async function onSaveData(evt) {
 				startEl.value = "";
 				endEl.value = "";
 				savedDataFormEl.querySelector("#period-exceptional").checked = false;
-				 renderPeriods();
+				renderPeriods();
+				renderCalendar();
 				NotificationManager.scheduleReminders(periodData,PeriodPrediction.predict(periodData.cycles));
 				notify("Period saved (encrypted) successfully.");
 			}
@@ -454,6 +490,109 @@ function renderPeriods() {
 		let item = document.createElement("li");
 		item.innerText = `${cycle.start}${cycle.end ? " to " + cycle.end : ""}${cycle.exceptional ? " (exceptional)" : ""}`;
 		listEl.appendChild(item);
+	}
+}
+
+function changeCalendarMonth(offset) {
+	calendarMonth = new Date(calendarMonth.getFullYear(),calendarMonth.getMonth() + offset,1);
+	renderCalendar();
+}
+
+function dateFromInput(value) {
+	let parts = String(value || "").split("-").map(Number);
+	return parts.length === 3 && parts.every(Number.isFinite) ? new Date(parts[0],parts[1] - 1,parts[2]) : null;
+}
+
+function dateKey(date) {
+	return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`;
+}
+
+function addDateRange(markers, start, end, marker) {
+	if (!start) return;
+	let last = end || start;
+	for (let date = new Date(start); date <= last; date.setDate(date.getDate() + 1)) markers[dateKey(date)] = (markers[dateKey(date)] || []).concat(marker);
+}
+
+function medicationWasTakenOn(medication,date) {
+	let target = dateKey(date);
+	return (medication.adherence || []).some(timestamp => dateKey(new Date(timestamp)) === target);
+}
+
+function renderCalendar() {
+	let gridEl = document.querySelector('[data-calendar="grid"]');
+	let labelEl = document.querySelector('[data-calendar="label"]');
+	if (!gridEl || !labelEl) return;
+	let year = calendarMonth.getFullYear();
+	let month = calendarMonth.getMonth();
+	let monthName = new Intl.DateTimeFormat(undefined,{ month: "long", year: "numeric" }).format(calendarMonth);
+	labelEl.innerText = monthName;
+	labelEl.setAttribute("aria-label",monthName);
+	gridEl.querySelectorAll(".calendar-day, .calendar-blank").forEach(item => item.remove());
+	let markers = {};
+	let monthStart = new Date(year,month,1);
+	let monthEnd = new Date(year,month + 1,0);
+	for (let cycle of periodData.cycles || []) {
+		let start = dateFromInput(cycle.start);
+		let end = dateFromInput(cycle.end) || start;
+		if (start && end >= monthStart && start <= monthEnd) addDateRange(markers,start < monthStart ? monthStart : start,end > monthEnd ? monthEnd : end,"period");
+	}
+	let prediction = PeriodPrediction.predict(periodData.cycles || []);
+	if (prediction.available) {
+		let predicted = dateFromInput(prediction.date);
+		let window = Math.max(1,Number(prediction.error) || 1);
+		let windowStart = new Date(predicted); windowStart.setDate(windowStart.getDate() - window);
+		let windowEnd = new Date(predicted); windowEnd.setDate(windowEnd.getDate() + window);
+		addDateRange(markers,windowStart,windowEnd,"predicted");
+		let ovulation = new Date(predicted); ovulation.setDate(ovulation.getDate() - 14);
+		addDateRange(markers,new Date(ovulation.getFullYear(),ovulation.getMonth(),ovulation.getDate() - 5),new Date(ovulation.getFullYear(),ovulation.getMonth(),ovulation.getDate() + 5),"fertile");
+		addDateRange(markers,ovulation,ovulation,"fertile");
+	}
+	for (let medication of periodData.medications || []) {
+		for (let timestamp of medication.adherence || []) {
+			let takenDate = new Date(timestamp);
+			if (takenDate >= monthStart && takenDate <= monthEnd) addDateRange(markers,takenDate,takenDate,"medication");
+		}
+	}
+	let firstDay = new Date(year,month,1);
+	let leadingBlanks = (firstDay.getDay() + 6) % 7;
+	for (let index = 0; index < leadingBlanks; index++) appendBlank();
+	let daysInMonth = new Date(year,month + 1,0).getDate();
+	for (let day = 1; day <= daysInMonth; day++) {
+		let date = new Date(year,month,day);
+		let dayEl = document.createElement("span");
+		let key = dateKey(date);
+		let dayMarkers = [...new Set(markers[key] || [])];
+		dayEl.className = "calendar-day";
+		dayEl.innerText = day;
+		dayEl.dataset.date = key;
+		if (dayMarkers.length) dayEl.dataset.marker = dayMarkers.join(" ");
+		dayEl.setAttribute("aria-label",`${monthName}, ${day}${dayMarkers.length ? `: ${dayMarkers.join(", ")}` : ""}`);
+		let markerEl = document.createElement("span");
+		markerEl.className = "calendar-markers";
+		if (dayMarkers.includes("period")) markerEl.appendChild(calendarIcon("/assets/blood-drop-icon-pink-pale.png","Period day","period-marker"));
+		if (dayMarkers.includes("predicted")) markerEl.appendChild(calendarIcon("/assets/blood-drop-icon-purple-dark.png","Projected period","projected-period-icon"));
+		if (dayMarkers.includes("fertile")) markerEl.appendChild(calendarIcon("/assets/moon-icon-full-cyan.png","Estimated fertile window","fertile-marker"));
+		if ((periodData.medications || []).some(medication => medicationWasTakenOn(medication,date))) markerEl.appendChild(calendarIcon("/assets/calendar-paw-icon.png","Medication taken","medication-marker"));
+		dayEl.appendChild(markerEl);
+		gridEl.appendChild(dayEl);
+	}
+	let trailingBlanks = (7 - ((leadingBlanks + daysInMonth) % 7)) % 7;
+	for (let index = 0; index < trailingBlanks; index++) appendBlank();
+
+	function appendBlank() {
+		let blankEl = document.createElement("span");
+		blankEl.className = "calendar-blank";
+		blankEl.setAttribute("aria-hidden","true");
+		gridEl.appendChild(blankEl);
+	}
+
+	function calendarIcon(src,alt,className) {
+		let icon = document.createElement("img");
+		icon.src = src;
+		icon.alt = alt;
+		icon.className = className;
+		icon.addEventListener("error",evt => { evt.currentTarget.replaceWith(document.createTextNode("🐾")); },{ once: true, });
+		return icon;
 	}
 }
 
@@ -495,8 +634,40 @@ function renderMedications() {
 		if (medication.notes) item.innerText += `; ${medication.notes}`;
 		let time = document.createElement("input"); time.type = "time"; time.value = periodData.reminders.medicationTimes[medication.id] || ""; time.setAttribute("aria-label",`Reminder time for ${medication.name}`); time.addEventListener("change",() => { periodData.reminders.medicationTimes[medication.id] = time.value; persistData("Medication reminder saved (encrypted) successfully."); }); item.append(" Daily reminder: ",time);
 		let history = document.createElement("span"); history.innerText = ` Taken: ${(medication.adherence || []).map(timestamp => new Date(timestamp).toLocaleString()).join(", ") || "none"}`; item.appendChild(history);
-		for (let [label, action] of [[takenToday ? "Taken today" : "Mark taken today","taken"],["Edit","edit"],["Delete","delete"]]) { let button = document.createElement("button"); button.type = "button"; button.dataset.action = action; button.dataset.id = medication.id; button.innerText = label; button.disabled = action === "taken" && takenToday; item.appendChild(button); }
+		for (let [label, action] of [[takenToday ? "Taken today" : "Mark taken today","taken"],["Edit","edit"],["Delete","delete"]]) { let button = document.createElement("button"); button.type = "button"; button.dataset.action = action; button.dataset.id = medication.id; button.innerText = label; button.disabled = action === "taken" && takenToday; if (action === "taken") button.classList.add("paw-action"); item.appendChild(button); }
 		list.appendChild(item);
+	}
+}
+
+function renderTodayMedicationLog() {
+	let logEl = document.getElementById("today-medication-log");
+	if (!logEl) return;
+	logEl.innerHTML = "";
+	let today = new Date();
+	let active = (periodData.medications || []).filter(medication => {
+		let start = dateFromInput(medication.startDate);
+		let end = dateFromInput(medication.endDate);
+		return start && start <= today && (!end || end >= today);
+	});
+	if (!active.length) {
+		let empty = document.createElement("p");
+		empty.className = "empty-state";
+		empty.innerText = "No medications scheduled for today.";
+		logEl.appendChild(empty);
+		return;
+	}
+	for (let medication of active) {
+		let taken = medicationWasTakenOn(medication,today);
+		let button = document.createElement("button");
+		button.type = "button";
+		button.className = `dose-rune${taken ? " is-taken" : ""}`;
+		button.dataset.action = "taken";
+		button.dataset.id = medication.id;
+		button.disabled = taken;
+		button.innerHTML = `<img src="/assets/calendar-paw-icon.png" alt=""> <span>${medication.name}</span><small>${taken ? "logged" : medication.dose}</small>`;
+		button.querySelector("img").addEventListener("error",evt => { evt.currentTarget.replaceWith(document.createTextNode("🐾")); },{ once: true, });
+		button.setAttribute("aria-label",`${medication.name}: ${taken ? "dose logged today" : "mark dose taken today"}`);
+		logEl.appendChild(button);
 	}
 }
 
@@ -529,6 +700,8 @@ async function persistData(message) {
 	let result = await DataManager.saveData(JSON.stringify(periodData),undefined,currentKeyText);
 	if (!result) { warn("Saving data failed. Please try again."); return false; }
 	renderMedications();
+	renderTodayMedicationLog();
+	renderCalendar();
 	NotificationManager.scheduleReminders(periodData,PeriodPrediction.predict(periodData.cycles));
 	if (message) notify(message);
 	return true;

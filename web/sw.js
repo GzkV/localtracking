@@ -15,9 +15,10 @@ const APP_SHELL = [
   "/assets/settings-gear-icon-cyan.png", "/assets/bell-icon-gold.png", "/assets/bell-icon-cyan.png",
   "/assets/user-icon-teal.png", "/assets/trend-up-icon-cyan.png", "/assets/undo-icon-left.png",
   "/assets/moon-phase-icon-cyan-glow.png", "/assets/moon-icon-crescent-left-bright.png", "/assets/moon-icon-full-cyan.png",
-  "/assets/blood-drop-icon-pink-pale.png", "/assets/blood-drop-icon-cyan-pink.png",
-  "/assets/potion-drop-icon-peach-lavender.png", "/assets/potion-drop-icon-peach-purple.png",
-  "/assets/chevron-left-icon-dark.png", "/assets/chevron-right-icon-slate.png", "/assets/eclipse-ring-icon-icy.png"
+	  "/assets/blood-drop-icon-pink-pale.png", "/assets/blood-drop-icon-purple-dark.png", "/assets/blood-drop-icon-cyan-pink.png",
+	  "/assets/potion-drop-icon-peach-lavender.png", "/assets/potion-drop-icon-peach-purple.png",
+	  "/assets/chevron-left-icon-dark.png", "/assets/chevron-right-icon-slate.png", "/assets/eclipse-ring-icon-icy.png",
+	  "/assets/calendar-paw-icon.png"
 ];
 self.addEventListener("install", event => event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)).then(() => self.skipWaiting())));
 self.addEventListener("activate", event => event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key)))).then(() => self.clients.claim())));

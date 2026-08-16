@@ -19,7 +19,7 @@ Art assets live in [`assets-src/werewolf/item-pack/`](../assets-src/werewolf/ite
 - "Today" quick-log card:
   - Period toggle: "Period started today" / "Period ended today" (maps to existing `#period-start` / `#period-end` date inputs, defaulting to today).
   - Symptom checklist/chips (flow intensity, cramps, mood, headache, fatigue, etc.).
-  - Medication dose checklist: today's scheduled medications with "taken" checkboxes (data from the existing `#medication-list` model).
+  - Medication dose checklist: today's scheduled medications with paw-print "taken" buttons (data from the existing `#medication-list` model).
 - Next-period estimate card (existing `#prediction` / `#prediction-result` section, `aria-live="polite"`).
 - Recent history list: last ~7–14 days of entries (existing `#period-list`, extended with symptom/dose entries).
 - Privacy note banner (existing `.privacy-note` text).
@@ -39,7 +39,7 @@ Art assets live in [`assets-src/werewolf/item-pack/`](../assets-src/werewolf/ite
 
 **Relevant code/assets:**
 - [`web/index.html`](../web/index.html) (`#saved-data`, `#prediction`, `#period-list`), [`web/js/main.js`](../web/js/main.js), [`web/js/data-manager.js`](../web/js/data-manager.js), [`web/js/period-prediction.js`](../web/js/period-prediction.js).
-- Icons: `home-icon-cyan.png` / `home-icon-teal.png` (nav), `blood-drop-icon-pink-pale.png` (period log), `potion-drop-icon-peach-lavender.png` (medication dose), `moon-phase-icon-cyan-glow.png` (prediction card).
+- Icons: `home-icon-cyan.png` / `home-icon-teal.png` (nav), `blood-drop-icon-pink-pale.png` (period log), `calendar-paw-icon.png` (medication dose), `moon-phase-icon-cyan-glow.png` (prediction card).
 
 ---
 
@@ -51,9 +51,9 @@ Art assets live in [`assets-src/werewolf/item-pack/`](../assets-src/werewolf/ite
 - Month grid with prev/next month controls (icons: `chevron-left-icon-dark.png`, `chevron-right-icon-slate.png`).
 - Day cells with layered markers:
   - Period days (blood-drop marker, e.g. `blood-drop-icon-cyan-pink.png`).
-  - Predicted next period span (highlighted range using `predict()` output: `date`, `min`/`max` window, `confidence`).
+  - Predicted next period span (highlighted range using `predict()` output: `date`, `min`/`max` window, `confidence`) with a red projected-period teardrop marker.
   - Fertile window estimate (derived from typical cycle length: ~14 days before predicted next period, ±2 days; moon-phase icons such as `moon-icon-full-cyan.png` for estimated ovulation).
-  - Symptom/dose dots.
+  - Medication dose markers use paw prints on exact adherence dates.
 - Legend explaining markers and the confidence label ("low / moderate / higher" from `predict()`).
 - Selected-day detail panel (mini version of Entry Detail view).
 - Disclaimer: predictions are estimates, not contraception or medical advice (existing `.privacy-note` copy).
@@ -71,7 +71,7 @@ Art assets live in [`assets-src/werewolf/item-pack/`](../assets-src/werewolf/ite
 
 **Relevant code/assets:**
 - [`web/js/period-prediction.js`](../web/js/period-prediction.js) (`predict()` returns `{ available, typical, min, max, confidence, date, error }`; exceptional cycles excluded via the `exceptional` flag).
-- Icons: `calendar-icon-grid.png`, `calendar-check-icon-cyan.png`, `calendar-wolf-moon-icon.png` (header/nav), moon-phase set (`moon-icon-new.png` … `moon-icon-full.png`) for cycle/fertile indicators.
+- Icons: `calendar-icon-grid.png`, `calendar-check-icon-cyan.png`, `calendar-wolf-moon-icon.png` (header/nav), `blood-drop-icon-pink-pale.png` (projected period), `calendar-paw-icon.png` (medication adherence), and the moon-phase set (`moon-icon-new.png` … `moon-icon-full.png`) for cycle/fertile indicators.
 
 ---
 

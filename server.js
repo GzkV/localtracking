@@ -31,7 +31,7 @@ var CSPHeader = {
 			`script-src ${[
 				"'self'",
 				// inline <script> tag for re-computing the vw/vh units
-				"'sha256-CoCYJ/tTxH9vJyISOUlowiGKF8OokDL5QBuS3H8R1/g='",
+				"'sha256-3eEyXcXnNEW9IQdOOEAJNSpjMExr1rxCvVdVzPyJAeE='",
 			].join(" ")};`,
 
 			`connect-src ${[
