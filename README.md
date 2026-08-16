@@ -72,6 +72,10 @@ All code for this app (both client and static-file-server) is open-source ([MIT 
 
 If you would like more details about the technical architecture of the app (client or server), please check out the [tech documentation](SPECS.md).
 
+## Asset organization
+
+`assets-src/` holds unreferenced source artwork and is not served by the web server. `web/` is the served static root.
+
 ## Contributing
 
 Before contributing to this project, **[please make sure to review our Code of Conduct](CODE_OF_CONDUCT.md)**.
