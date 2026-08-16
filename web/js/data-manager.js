@@ -1,6 +1,6 @@
 import * as idbKeyval from "/js/external/idb-keyval.js";
 
-export { getData, saveData, };
+export { getData, saveData, getEncryptedAccount, decryptPayload, };
 
 const b64AB = window["base64-arraybuffer"];
 const aesDefaultOptions = {
@@ -30,6 +30,29 @@ async function getData(accountID,keyText) {
 	catch (err) {
 		console.log(err);
 	}
+}
+
+async function getEncryptedAccount(accountID) {
+	let accounts = await idbKeyval.get("accounts") || {};
+	let account = accounts[accountID];
+	if (!account) return;
+	return {
+		profileName: account.profileName,
+		loginChallenge: account.loginChallenge,
+		keyInfo: account.keyInfo,
+		data: account.data,
+		dataIV: account.dataIV,
+	};
+}
+
+async function decryptPayload(account,keyText) {
+	if (!account || !keyText || !account.data || !account.dataIV) return;
+	let iv = b64AB.decode(account.dataIV);
+	let keyBuffer = b64AB.decode(keyText);
+	let key = await crypto.subtle.importKey("raw",keyBuffer,"AES-GCM",false,[ "decrypt", ]);
+	let dataBuffer = b64AB.decode(account.data);
+	dataBuffer = await crypto.subtle.decrypt(Object.assign({},aesDefaultOptions,{ iv, }),key,dataBuffer);
+	return (new TextDecoder()).decode(dataBuffer);
 }
 
 async function saveData(data,accountID,keyText,resaveWithNewCredentials = false) {

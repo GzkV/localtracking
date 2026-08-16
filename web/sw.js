@@ -1,4 +1,4 @@
-const CACHE_NAME = "you-shell-v3";
+const CACHE_NAME = "moon-time-shell-v5";
 const APP_SHELL = [
   "/", "/index.html", "/about.html", "/privacy.html", "/manifest.webmanifest",
   "/css/style.css", "/js/main.js", "/js/browser-support.js", "/js/data-manager.js",
@@ -21,4 +21,11 @@ self.addEventListener("fetch", event => {
     }
     return response;
   }).catch(() => caches.match(event.request).then(cached => cached || (event.request.mode === "navigate" ? caches.match("/index.html") : Response.error()))));
+});
+self.addEventListener("notificationclick", event => {
+  event.notification.close();
+  event.waitUntil(self.clients.matchAll({ type: "window", includeUncontrolled: true }).then(clients => {
+    const client = clients.find(item => "focus" in item);
+    return client ? client.focus() : self.clients.openWindow("/");
+  }));
 });

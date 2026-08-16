@@ -1,7 +1,7 @@
 import * as idbKeyval from "/js/external/idb-keyval.js";
 import * as DataManager from "/js/data-manager.js";
 import * as NotificationManager from "/js/notification-manager.js";
-import { MINIMUM_FEATURES_SUPPORTED } from "/js/browser-support.js";
+import { MINIMUM_FEATURES_SUPPORTED, storageManagerPersistSupported } from "/js/browser-support.js";
 import * as RandomPhrase from "/js/passphrase/random-phrase.js";
 import * as PeriodPrediction from "/js/period-prediction.js";
 
@@ -11,12 +11,14 @@ var passphraseSuggestionFormEl;
 var loginFormEl;
 var savedDataFormEl;
 var changePassphraseFormEl;
+var restoreBackupFormEl;
 var profileNameSelectorEl;
 var profileLabelEl;
 var authWorker;
 var tmpDataBackup = UNSET;
 var currentKeyText;
-var periodData = { version: 1, cycles: [], };
+var pendingBackup;
+var periodData = { version: 2, cycles: [], medications: [], reminders: { medicationTimes: {}, periodDaysBefore: null, }, };
 
 document.addEventListener("DOMContentLoaded",() => main().catch(console.log),false);
 
@@ -30,6 +32,7 @@ async function main() {
 	loginFormEl = document.getElementById("login");
 	savedDataFormEl = document.getElementById("saved-data");
 	changePassphraseFormEl = document.getElementById("change-secure-passphrase");
+	restoreBackupFormEl = document.getElementById("restore-backup");
 	profileNameSelectorEl = document.getElementById("profile-names");
 	profileLabelEl = document.getElementById("profile-label");
 
@@ -57,6 +60,13 @@ async function main() {
 		loginFormEl.addEventListener("submit",onLogin,false);
 		savedDataFormEl.addEventListener("submit",onSaveData,false);
 		changePassphraseFormEl.addEventListener("submit",onChangePassphrase,false);
+		restoreBackupFormEl.addEventListener("submit",onRestoreBackup,false);
+		document.getElementById("export-backup-btn").addEventListener("click",onExportBackup,false);
+		document.getElementById("save-medication-btn").addEventListener("click",onSaveMedication,false);
+		document.getElementById("cancel-medication-btn").addEventListener("click",resetMedicationEditor,false);
+		document.getElementById("medication-list").addEventListener("click",onMedicationAction,false);
+		document.getElementById("period-reminder-days").addEventListener("change",onReminderSettingsChange,false);
+		document.getElementById("request-notification-btn").addEventListener("click",onRequestNotifications,false);
 	}
 
 	authWorker = new Worker("/js/auth-worker.js");
@@ -76,7 +86,7 @@ async function main() {
 		let keyText = currentKeyText;
 
 		// already logged in?
-		if (accountID && keyText) {
+	if (accountID && keyText) {
 			await showSavedDataPage();
 		}
 		else {
@@ -163,14 +173,22 @@ async function populateSavedData() {
 	}
 
 	let data = await DataManager.getData(undefined,currentKeyText);
+	let needsMigration = false;
 	try {
 		let parsed = data ? JSON.parse(data) : null;
-		periodData = parsed && Array.isArray(parsed.cycles) ? parsed : { version: 1, cycles: [], };
+		periodData = parsed && Array.isArray(parsed.cycles) ? parsed : { version: 2, cycles: [], medications: [], reminders: { medicationTimes: {}, periodDaysBefore: null, }, };
+		if (periodData.version < 2) { periodData = Object.assign(periodData,{ version: 2, medications: [], }); needsMigration = true; }
+		periodData.medications = Array.isArray(periodData.medications) ? periodData.medications : [];
+		periodData.reminders = periodData.reminders || { medicationTimes: {}, periodDaysBefore: null, };
+		periodData.reminders.medicationTimes = periodData.reminders.medicationTimes || {};
 	}
 	catch (err) {
-		periodData = { version: 1, cycles: [], };
+		periodData = { version: 2, cycles: [], medications: [], reminders: { medicationTimes: {}, periodDaysBefore: null, }, };
 	}
 	renderPeriods();
+	renderMedications();
+	if (needsMigration) await DataManager.saveData(JSON.stringify(periodData),undefined,currentKeyText);
+	NotificationManager.scheduleReminders(periodData,PeriodPrediction.predict(periodData.cycles));
 }
 
 async function onSuggestPassphrase(evt) {
@@ -267,6 +285,69 @@ async function onLogin(evt) {
 	}
 }
 
+async function onExportBackup() {
+	let accountID = sessionStorage.getItem("current-account-id");
+	let account = await DataManager.getEncryptedAccount(accountID);
+	if (!account || !account.data) { warn("There is no encrypted data to export yet."); return; }
+	let backup = {
+		format: "Moon.Time encrypted backup",
+		version: 1,
+		exportedAt: new Date().toISOString(),
+		accountID,
+		account,
+	};
+	let blob = new Blob([JSON.stringify(backup,null,2)],{ type: "application/json", });
+	let url = URL.createObjectURL(blob);
+	let link = document.createElement("a");
+	link.href = url;
+	link.download = `moon-time-backup-${new Date().toISOString().slice(0,10)}.json`;
+	link.click();
+	URL.revokeObjectURL(url);
+	notify("Encrypted backup downloaded. Keep it with your passphrase.");
+}
+
+async function onRestoreBackup(evt) {
+	cancelEvent(evt);
+	let file = document.getElementById("backup-file").files[0];
+	let passwordEl = document.getElementById("backup-password");
+	if (!file || passwordEl.value.trim().length < 12) { warn("Choose a backup and enter its passphrase (at least 12 characters).",false); return; }
+	try {
+		let backup = JSON.parse(await file.text());
+		if (backup.format !== "Moon.Time encrypted backup" || backup.version !== 1 || !backup.account || !backup.account.keyInfo) throw new Error("Invalid backup");
+		pendingBackup = backup;
+		authWorker.postMessage({ verifyBackup: { account: backup.account, password: passwordEl.value.trim(), }, });
+		passwordEl.value = "";
+		notify("Verifying backup passphrase, please wait...");
+	}
+	catch (err) { console.log(err); warn("Could not read that backup file."); }
+}
+
+async function restoreVerifiedBackup(keyText) {
+	let backup = pendingBackup;
+	pendingBackup = undefined;
+	let plaintext = await DataManager.decryptPayload(backup.account,keyText);
+	if (!plaintext) throw new Error("Backup decryption failed");
+	let profiles = await getProfiles();
+	let accounts = await getAccounts();
+	let requestedName = document.getElementById("backup-profile-name").value.trim();
+	let targetID = profileNameSelectorEl.value;
+	let targetExists = targetID && accounts[targetID];
+	let profileName = requestedName || (targetExists ? accounts[targetID].profileName : backup.account.profileName);
+	if (!profileName || profileName.length < 2) throw new Error("A profile name is required");
+	if (!targetExists || requestedName) {
+		targetID = crypto.randomUUID();
+		if (profiles[profileName]) throw new Error("That profile name is already in use");
+	}
+	accounts[targetID] = Object.assign({},backup.account,{ profileName, });
+	profiles[profileName] = targetID;
+	await Promise.all([idbKeyval.set("profiles",profiles),idbKeyval.set("accounts",accounts)]);
+	populateProfileSelector(profiles);
+	sessionStorage.setItem("current-account-id",targetID);
+	currentKeyText = keyText;
+	await showSavedDataPage();
+	notify("Encrypted backup restored successfully.",true);
+}
+
 async function onLogout(evt = false) {
 	if (evt) {
 		cancelEvent(evt);
@@ -302,12 +383,14 @@ async function onSaveData(evt) {
 		periodData.cycles.push({ start: startEl.value, end: endEl.value || null, exceptional: savedDataFormEl.querySelector("#period-exceptional").checked, });
 		periodData.cycles.sort((a,b) => a.start.localeCompare(b.start));
 		try {
+			periodData.version = 2;
 			let res = await DataManager.saveData(JSON.stringify(periodData),undefined,currentKeyText);
 			if (res) {
 				startEl.value = "";
 				endEl.value = "";
 				savedDataFormEl.querySelector("#period-exceptional").checked = false;
-				renderPeriods();
+				 renderPeriods();
+				NotificationManager.scheduleReminders(periodData,PeriodPrediction.predict(periodData.cycles));
 				notify("Period saved (encrypted) successfully.");
 			}
 			else {
@@ -334,6 +417,83 @@ function renderPeriods() {
 		item.innerText = `${cycle.start}${cycle.end ? " to " + cycle.end : ""}${cycle.exceptional ? " (exceptional)" : ""}`;
 		listEl.appendChild(item);
 	}
+}
+
+async function onSaveMedication() {
+	let idEl = document.getElementById("medication-id");
+	let name = document.getElementById("medication-name").value.trim();
+	let dose = document.getElementById("medication-dose").value.trim();
+	let schedule = document.getElementById("medication-schedule").value.trim();
+	let startDate = document.getElementById("medication-start").value;
+	let endDate = document.getElementById("medication-end").value;
+	if (!name || !dose || !schedule || !startDate || (endDate && endDate < startDate)) {
+		warn("Please enter a medication name, dose, schedule, and valid dates.");
+		return;
+	}
+	let old = periodData.medications.find(item => item.id === idEl.value);
+	let medication = { id: idEl.value || crypto.randomUUID(), name, dose, schedule, startDate, endDate: endDate || null, notes: document.getElementById("medication-notes").value.trim() || null, adherence: old ? old.adherence : [], };
+	periodData.medications = periodData.medications.filter(item => item.id !== medication.id);
+	periodData.medications.push(medication);
+	if (!periodData.reminders.medicationTimes[medication.id]) periodData.reminders.medicationTimes[medication.id] = "";
+	await persistData("Medication saved (encrypted) successfully.");
+	resetMedicationEditor();
+}
+
+function resetMedicationEditor() {
+	let editor = document.getElementById("medication-editor");
+	for (let input of editor.querySelectorAll("input:not([type=hidden]), textarea")) input.value = "";
+	document.getElementById("medication-id").value = "";
+	document.getElementById("cancel-medication-btn").classList.add("hidden");
+}
+
+function renderMedications() {
+	let list = document.getElementById("medication-list");
+	list.innerHTML = "";
+	document.getElementById("period-reminder-days").value = Number.isInteger(periodData.reminders.periodDaysBefore) ? periodData.reminders.periodDaysBefore : "";
+	for (let medication of periodData.medications) {
+		let item = document.createElement("li");
+		let takenToday = (medication.adherence || []).some(timestamp => new Date(timestamp).toDateString() === new Date().toDateString());
+		item.innerText = `${medication.name} — ${medication.dose}, ${medication.schedule} (${medication.startDate}${medication.endDate ? " to " + medication.endDate : ""})`;
+		if (medication.notes) item.innerText += `; ${medication.notes}`;
+		let time = document.createElement("input"); time.type = "time"; time.value = periodData.reminders.medicationTimes[medication.id] || ""; time.setAttribute("aria-label",`Reminder time for ${medication.name}`); time.addEventListener("change",() => { periodData.reminders.medicationTimes[medication.id] = time.value; persistData("Medication reminder saved (encrypted) successfully."); }); item.append(" Daily reminder: ",time);
+		let history = document.createElement("span"); history.innerText = ` Taken: ${(medication.adherence || []).map(timestamp => new Date(timestamp).toLocaleString()).join(", ") || "none"}`; item.appendChild(history);
+		for (let [label, action] of [[takenToday ? "Taken today" : "Mark taken today","taken"],["Edit","edit"],["Delete","delete"]]) { let button = document.createElement("button"); button.type = "button"; button.dataset.action = action; button.dataset.id = medication.id; button.innerText = label; button.disabled = action === "taken" && takenToday; item.appendChild(button); }
+		list.appendChild(item);
+	}
+}
+
+async function onMedicationAction(evt) {
+	let button = evt.target.closest("button[data-action]");
+	if (!button) return;
+	let medication = periodData.medications.find(item => item.id === button.dataset.id);
+	if (!medication) return;
+	if (button.dataset.action === "taken") medication.adherence = (medication.adherence || []).concat(new Date().toISOString());
+	else if (button.dataset.action === "delete") { periodData.medications = periodData.medications.filter(item => item.id !== medication.id); delete periodData.reminders.medicationTimes[medication.id]; }
+	else { for (let [key, value] of Object.entries({ "medication-id": medication.id, "medication-name": medication.name, "medication-dose": medication.dose, "medication-schedule": medication.schedule, "medication-start": medication.startDate, "medication-end": medication.endDate || "", "medication-notes": medication.notes || "" })) document.getElementById(key).value = value; document.getElementById("cancel-medication-btn").classList.remove("hidden"); return; }
+	await persistData(button.dataset.action === "delete" ? "Medication deleted (encrypted) successfully." : "Dose recorded (encrypted) successfully.");
+}
+
+async function onReminderSettingsChange() {
+	let value = document.getElementById("period-reminder-days").value;
+	periodData.reminders.periodDaysBefore = value === "" ? null : Number(value);
+	await persistData("Reminder settings saved (encrypted) successfully.");
+}
+
+async function onRequestNotifications() {
+	let permission = await NotificationManager.requestPermission();
+	let message = permission === "granted" ? "Notifications enabled while Moon.Time is open." : permission === "unsupported" ? "Notifications are not supported by this browser." : "Notification permission was not granted.";
+	document.getElementById("reminder-feedback").innerText = message;
+	NotificationManager.scheduleReminders(periodData,PeriodPrediction.predict(periodData.cycles));
+}
+
+async function persistData(message) {
+	periodData.version = 2;
+	let result = await DataManager.saveData(JSON.stringify(periodData),undefined,currentKeyText);
+	if (!result) { warn("Saving data failed. Please try again."); return false; }
+	renderMedications();
+	NotificationManager.scheduleReminders(periodData,PeriodPrediction.predict(periodData.cycles));
+	if (message) notify(message);
+	return true;
 }
 
 function onChangePassphrase(evt) {
@@ -438,6 +598,7 @@ function showUnsupportedBrowserPage() {
 
 function showRegistrationPage() {
 	hideLoginPage();
+	hideRestoreBackupPage();
 	hideSavedDataPage();
 	hideChangePassphrasePage();
 
@@ -462,6 +623,8 @@ function showLoginPage() {
 	hideRegistrationPage();
 	hideSavedDataPage();
 	hideChangePassphrasePage();
+	restoreBackupFormEl.classList.remove("hidden");
+	restoreBackupFormEl.removeAttribute("inert");
 
 	loginFormEl.removeAttribute("inert");
 	loginFormEl.reset();
@@ -478,14 +641,22 @@ function hideLoginPage() {
 	loginFormEl.classList.add("hidden");
 	loginFormEl.setAttribute("inert","inert");
 	loginFormEl.reset();
+	hideRestoreBackupPage();
 	var submitBtn = loginFormEl.querySelector("button[type=submit]");
 	submitBtn.disabled = true;
 	var createAnotherProfileBtn = document.getElementById("create-another-profile-btn");
 	createAnotherProfileBtn.disabled = true;
 }
 
+function hideRestoreBackupPage() {
+	restoreBackupFormEl.classList.add("hidden");
+	restoreBackupFormEl.setAttribute("inert","inert");
+	restoreBackupFormEl.reset();
+}
+
 async function showSavedDataPage() {
 	hideLoginPage();
+	hideRestoreBackupPage();
 	hideRegistrationPage();
 	hideChangePassphrasePage();
 
@@ -495,6 +666,16 @@ async function showSavedDataPage() {
 	savedDataFormEl.removeAttribute("inert");
 	var submitBtn = savedDataFormEl.querySelector("button[type=submit]");
 	submitBtn.disabled = false;
+	if (storageManagerPersistSupported()) {
+		let persisted = false;
+		try { persisted = await navigator.storage.persist(); } catch (err) {}
+		let notice = document.getElementById("storage-persistence-notice");
+		if (!persisted) {
+			notice.innerText = "This browser has not granted persistent storage. Keep encrypted backups because local data may be cleared.";
+			notice.classList.remove("hidden");
+		}
+		else notice.classList.add("hidden");
+	}
 }
 
 function hideSavedDataPage() {
@@ -539,6 +720,11 @@ function warn(msg,isModal = true) {
 // *******************************
 
 async function onAuthMessage({ data }) {
+	if (data.backupVerified) {
+		try { await restoreVerifiedBackup(data.keyText); }
+		catch (err) { console.log(err); pendingBackup = undefined; warn("Backup restore failed. The existing profile was not changed."); }
+		return;
+	}
 	if (data.login === true) {
 		// upgrade/change of auth credentials pending?
 		if (data.upgradePending || data.changePending) {

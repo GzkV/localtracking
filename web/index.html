@@ -2,25 +2,25 @@
 <html lang="en-US">
 <head>
 <meta charset="utf-8">
-<title>YOU .</title>
+<title>Moon.Time</title>
 
 <meta name="viewport" content="width=device-width">
 <meta name="robots" content="index, follow">
 <meta name="theme-color" content="#000000">
 <meta name="author" content="Anonymous">
-<meta itemprop="name" content="You.">
-<meta itemprop="description" content="You. -- The privacy-first period-tracking app">
+<meta itemprop="name" content="Moon.Time">
+<meta itemprop="description" content="Moon.Time -- The privacy-first period-tracking app">
 <meta itemprop="image" content="https://youperiod.app/icons/app-icon-512.svg">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="You.">
-<meta name="twitter:description" content="You. -- The privacy-first period-tracking app">
+<meta name="twitter:title" content="Moon.Time">
+<meta name="twitter:description" content="Moon.Time -- The privacy-first period-tracking app">
 <meta name="twitter:image" content="https://youperiod.app/icons/app-icon-512.svg">
-<meta name="twitter:image:alt" content="You. App">
-<meta name="title" property="og:title" content="You.">
-<meta name="description" property="og:description" content="You. -- The privacy-first period-tracking app">
+<meta name="twitter:image:alt" content="Moon.Time app">
+<meta name="title" property="og:title" content="Moon.Time">
+<meta name="description" property="og:description" content="Moon.Time -- The privacy-first period-tracking app">
 <meta name="image" property="og:image" content="https://youperiod.app/icons/app-icon-512.svg">
 <meta name="url" property="og:url" content="https://youperiod.app/">
-<meta name="site_name" property="og:site_name" content="You.">
+<meta name="site_name" property="og:site_name" content="Moon.Time">
 <meta name="type" property="og:type" content="website">
 
 <link rel="canonical" href="https://youperiod.app/" />
@@ -42,7 +42,7 @@ if (document.documentElement && document.documentElement.style && document.docum
 
 <header>
 
-<h1 id="logo">YOU<i class="bold-period" aria-label="stylized period in red color"></i></h1>
+<h1 id="logo">Moon.Time</h1>
 
 <nav>
     <ul>
@@ -85,6 +85,14 @@ if (document.documentElement && document.documentElement.style && document.docum
 	</p>
 </form>
 
+<form id="restore-backup" class="hidden" inert>
+	<p><label for="backup-file">Restore encrypted backup:</label> <input type="file" id="backup-file" accept="application/json,.json"></p>
+	<p><label for="backup-password">Backup passphrase:</label> <input type="password" id="backup-password" autocomplete="phrase"></p>
+	<p><label for="backup-profile-name">New profile name (leave blank to restore into the selected profile, or use the backup name):</label> <input type="text" id="backup-profile-name" maxlength="100"></p>
+	<p><button type="submit">Restore Backup</button></p>
+	<p class="privacy-note">Your passphrase is not included in backups. Losing it means losing access to the encrypted data. Keep this backup and passphrase in safe places.</p>
+</form>
+
 <form id="generate-passphrase-suggestion" class="hidden">
 	<p>
 		<label for="generate-passphrase">Generate a secure passphrase.</label>
@@ -122,7 +130,10 @@ if (document.documentElement && document.documentElement.style && document.docum
 	<p>
 		<button type="button" id="logout-btn">Logout</button>
 		<button type="button" id="change-passphrase-btn">Change Passphrase</button>
+		<button type="button" id="export-backup-btn">Download Encrypted Backup</button>
 	</p>
+	<p id="storage-persistence-notice" class="privacy-note hidden" role="status"></p>
+	<p class="privacy-note">Keep encrypted backups. Your passphrase is not recoverable; if you lose it, your data is lost.</p>
 	<p>
 		Profile: <strong><span id="profile-label"></span></strong>
 		<button type="button" id="delete-profile-btn">Delete Local Profile</button>
@@ -138,6 +149,26 @@ if (document.documentElement && document.documentElement.style && document.docum
 		<button type="submit" disabled>Save period</button>
 	</p>
 	<ul id="period-list"></ul>
+	<hr>
+	<section id="medications" aria-live="polite">
+		<h3>Medications</h3>
+		<p id="medication-feedback" aria-live="polite"></p>
+		<div id="medication-editor">
+			<input type="hidden" id="medication-id">
+			<p><label for="medication-name">Name:</label> <input type="text" id="medication-name" maxlength="100"></p>
+			<p><label for="medication-dose">Dose:</label> <input type="text" id="medication-dose" maxlength="50" placeholder="20mg"></p>
+			<p><label for="medication-schedule">Schedule/frequency:</label> <input type="text" id="medication-schedule" maxlength="100" placeholder="daily"></p>
+			<p><label for="medication-start">Start date:</label> <input type="date" id="medication-start"></p>
+			<p><label for="medication-end">End date (optional):</label> <input type="date" id="medication-end"></p>
+			<p><label for="medication-notes">Notes (optional):</label> <textarea id="medication-notes" maxlength="500"></textarea></p>
+			<p><button type="button" id="save-medication-btn">Save medication</button> <button type="button" id="cancel-medication-btn" class="hidden">Cancel edit</button></p>
+		</div>
+		<ul id="medication-list"></ul>
+		<h3>Reminders</h3>
+		<p><label for="period-reminder-days">Period reminder days before estimate (optional):</label> <input type="number" id="period-reminder-days" min="0" max="30"></p>
+		<p><button type="button" id="request-notification-btn">Enable notifications</button></p>
+		<p id="reminder-feedback" aria-live="polite"></p>
+	</section>
 </form>
 
 <form id="change-secure-passphrase" class="hidden" inert>
@@ -163,7 +194,7 @@ if (document.documentElement && document.documentElement.style && document.docum
 
 </main>
 
-<footer>&copy;2022 YOU<i class="bold-period" aria-label="stylized period in red color"></i></footer>
+<footer>&copy;2022 Moon.Time</footer>
 
 <div id="notification-banner" class="hidden" role="dialog" aria-modal="true" aria-labelledby="notification-message">
 	<form>

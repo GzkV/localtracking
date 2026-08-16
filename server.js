@@ -7,12 +7,16 @@ process.on("uncaughtException",function(err){
 
 var path = require("path");
 var http = require("http");
+const PORT = process.env.HTTP_SERVER_PORT || 8034;
+const APP_ORIGIN = process.env.APP_ORIGIN || `http://localhost:${PORT}`;
+// NODE_ENV=production enables HTTPS redirects and production response behavior.
+const DEV = process.env.NODE_ENV !== "production";
 var httpServer = http.createServer(handleRequest);
 
 var nodeStaticAlias = require("@getify/node-static-alias");
 
 var AccessControlHeader = {
-	"Access-Control-Allow-Origin": "https://youperiod.app",
+	"Access-Control-Allow-Origin": APP_ORIGIN,
 };
 var HSTSHeader = {
 	"Strict-Transport-Security": `max-age=${ 1E9 }`,
@@ -39,12 +43,10 @@ var CSPHeader = {
 };
 
 const STATIC_DIR = path.join(__dirname,"web");
-const DEV = true;
 const CACHE_FILES = false;
-const PORT = process.env.HTTP_SERVER_PORT || 8034;
 
 var staticServer = new nodeStaticAlias.Server(STATIC_DIR,{
-	serverInfo: "YouPeriod",
+	serverInfo: "Moon.Time",
 	cache: CACHE_FILES ? (60 * 60 * 3) : 0,
 	gzip: /^(?:(?:text\/.+)|(?:image\/svg\+xml)|(?:application\/javascript)|(?:application\/json)|(?:application\/manifest\+json))(?:; charset=utf-8)?$/,
 	headers: {
@@ -93,9 +95,10 @@ httpServer.listen(PORT, () => {
 // *************************************
 
 function handleRequest(req,res) {
-	if (!DEV && !/^youperiod\.app$/.test(req.headers["host"])) {
+	let appURL = new URL(APP_ORIGIN);
+	if (!DEV && req.headers["host"] !== appURL.host) {
 		res.writeHeader(307,{
-			Location: `https://youperiod.app${req.url}`,
+			Location: `${APP_ORIGIN}${req.url}`,
 			"Cache-Control": "public, max-age=3600",
 			Expires: new Date(Date.now() + (3600 * 1000) ).toUTCString(),
 		});
@@ -106,7 +109,7 @@ function handleRequest(req,res) {
 		res.writeHead(301,{
 			"Cache-Control": "public, max-age=31536000",
 			Expires: new Date(Date.now() + 31536000000).toUTCString(),
-			Location: `https://youperiod.app${req.url}`
+			Location: `${APP_ORIGIN}${req.url}`
 		});
 		res.end();
 	}

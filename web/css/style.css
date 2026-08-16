@@ -41,6 +41,8 @@ button {
 form input[type=text],
 form input[type=password],
 form input[type=date],
+form input[type=time],
+form input[type=number],
 form textarea {
 	max-width: calc(var(--vw-unit) * 75);
 }
@@ -51,6 +53,16 @@ form textarea {
 }
 #prediction {
 	background: rgba(var(--color-gray-1));
+}
+#medications {
+	padding: 0.7em;
+	border-left: 0.25em solid rgba(var(--color-red-1));
+}
+#medication-list li {
+	margin-bottom: 1em;
+}
+#medication-list button {
+	margin: 0.2em;
 }
 
 main[inert],
@@ -118,6 +130,9 @@ main {
 }
 
 form.hidden {
+	display: none;
+}
+.hidden {
 	display: none;
 }
 

@@ -30,6 +30,22 @@ async function onMessage({ data }) {
 	else if (data.changeAuth) {
 		await onChangeAuth(data.changeAuth);
 	}
+	else if (data.verifyBackup) {
+		await onVerifyBackup(data.verifyBackup);
+	}
+}
+
+async function onVerifyBackup({ account, password, }) {
+	try {
+		let loginAttemptHash = await createLoginChallenge(account,password);
+		if (account.loginChallenge === loginAttemptHash) {
+			let keyInfo = await createEncryptionKey(account,password);
+			self.postMessage({ backupVerified: true, keyText: keyInfo.hash, });
+			return;
+		}
+	}
+	catch (err) { console.log(err); }
+	self.postMessage({ error: "Backup passphrase verification failed." });
 }
 
 function getKeyParams(account) {

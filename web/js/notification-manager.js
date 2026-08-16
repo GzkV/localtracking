@@ -1,4 +1,4 @@
-export { init, show, hide, };
+export { init, show, hide, requestPermission, scheduleReminders, };
 
 const AUTO_DISMISS_DELAY = 5000;
 const NO_OP_FUNCTION = () => {};
@@ -13,6 +13,7 @@ var cancelBtnEl;
 var okBtnEl;
 var autoDismissTimer;
 var closeCallback;
+var reminderTimers = [];
 
 
 // ****************************
@@ -179,6 +180,42 @@ function hide(result = false) {
 		Promise.resolve(result).then(closeCallback);
 		closeCallback = null;
 	}
+}
+
+async function requestPermission() {
+	if (!("Notification" in window)) return "unsupported";
+	return await Notification.requestPermission();
+}
+
+function scheduleReminders(data, prediction) {
+	for (let timer of reminderTimers) clearTimeout(timer);
+	reminderTimers = [];
+	if (!("Notification" in window) || Notification.permission !== "granted") return;
+	let now = new Date();
+	for (let medication of data.medications || []) {
+		let time = data.reminders && data.reminders.medicationTimes && data.reminders.medicationTimes[medication.id];
+		if (time) scheduleDaily(medication, time, now);
+	}
+	let days = data.reminders && data.reminders.periodDaysBefore;
+	if (prediction && prediction.available && Number.isInteger(days) && days >= 0) {
+		let when = new Date(`${prediction.date}T09:00:00`);
+		when.setDate(when.getDate() - days);
+		if (when > now) reminderTimers.push(setTimeout(() => {
+			new Notification("Period reminder", { body: `Your estimated period date is ${prediction.date}.`, tag: "period-reminder" });
+		}, when - now));
+	}
+}
+
+function scheduleDaily(medication, time, now) {
+	let [hours, minutes] = time.split(":").map(Number);
+	if (!Number.isInteger(hours) || !Number.isInteger(minutes)) return;
+	let when = new Date(now);
+	when.setHours(hours,minutes,0,0);
+	if (when <= now) when.setDate(when.getDate() + 1);
+	reminderTimers.push(setTimeout(() => {
+		new Notification(`Medication reminder: ${medication.name}`, { body: `${medication.dose} — ${medication.schedule}`, tag: `medication-${medication.id}` });
+		scheduleDaily(medication,time,new Date());
+	}, when - now));
 }
 
 function onFormSubmit(evt) {
