@@ -6,6 +6,11 @@ import * as RandomPhrase from "/js/passphrase/random-phrase.js";
 import * as PeriodPrediction from "/js/period-prediction.js";
 
 const UNSET = Symbol("unset");
+const UAT_MODE = (
+	new URLSearchParams(window.location.search).get("uat") === "1" &&
+	["localhost","127.0.0.1","::1"].includes(window.location.hostname)
+);
+const UAT_ACCOUNT_ID = "localtracking-uat-testing";
 var createProfileFormEl;
 var passphraseSuggestionFormEl;
 var loginFormEl;
@@ -73,8 +78,10 @@ async function main() {
 	authWorker.addEventListener("message",onAuthMessage,false);
 
 	loadProfiles: {
+		if (UAT_MODE) await ensureTestingAccount();
 		let profiles = await getProfiles();
 		populateProfileSelector(profiles);
+		document.getElementById("uat-login-note").classList.toggle("hidden",!UAT_MODE);
 	}
 
 	// no registered login(s) yet?
@@ -103,6 +110,26 @@ async function getProfiles() {
 async function getAccounts() {
 	var accounts = await idbKeyval.get("accounts");
 	return accounts || {};
+}
+
+async function ensureTestingAccount() {
+	let [ profiles, accounts, ] = await Promise.all([
+		getProfiles(),
+		getAccounts(),
+	]);
+	if (profiles.Testing && profiles.Testing !== UAT_ACCOUNT_ID) return;
+	if (!accounts[UAT_ACCOUNT_ID]) {
+		accounts[UAT_ACCOUNT_ID] = {
+			profileName: "Testing",
+			testAccount: true,
+			testKeyText: b64AB.encode(crypto.getRandomValues(new Uint8Array(32))),
+		};
+		profiles.Testing = UAT_ACCOUNT_ID;
+		await Promise.all([
+			idbKeyval.set("profiles",profiles),
+			idbKeyval.set("accounts",accounts),
+		]);
+	}
 }
 
 async function addProfileAccount(profileName,accountID) {
@@ -267,6 +294,17 @@ async function onLogin(evt) {
 		let passphraseEl = loginFormEl.querySelector("#login-password");
 		let password = passphraseEl.value.trim();
 		passphraseEl.value = "";
+		if (UAT_MODE && accountID === UAT_ACCOUNT_ID) {
+			let accounts = await getAccounts();
+			let account = accounts[accountID];
+			if (account && account.testAccount && account.testKeyText) {
+				sessionStorage.setItem("current-account-id",accountID);
+				currentKeyText = account.testKeyText;
+				NotificationManager.hide();
+				await showSavedDataPage();
+				return;
+			}
+		}
 
 		if (password.length < 12) {
 			warn("Please login with a passphrase at least 12 characters long.");

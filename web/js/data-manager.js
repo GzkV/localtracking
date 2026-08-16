@@ -16,6 +16,7 @@ async function getData(accountID,keyText) {
 		if (!keyText) return;
 		let accounts = await idbKeyval.get("accounts");
 		let account = accounts[accountID];
+		if (!account) return;
 
 		if (account.data && account.dataIV) {
 			let iv = b64AB.decode(account.dataIV);
@@ -61,6 +62,7 @@ async function saveData(data,accountID,keyText,resaveWithNewCredentials = false)
 		if (!keyText) return false;
 		let accounts = await idbKeyval.get("accounts");
 		let account = accounts[accountID];
+		if (!account) return false;
 
 		let iv = new Uint8Array(16);
 		self.crypto.getRandomValues(iv);
