@@ -179,11 +179,11 @@ window.addEventListener("unhandledrejection",evt => {
 
 	<section class="view-card today-card">
 		<div class="view-card-header">
-			<img class="view-icon" src="/assets/blood-drop-icon-pink-pale.png" alt="" aria-hidden="true">
+			<img class="view-icon" src="/assets/sprite-6-1.png" alt="" aria-hidden="true">
 			<h3>Today — Quick Log</h3>
 		</div>
-		<p><label for="period-start">Period start date:</label> <input type="date" id="period-start" required></p>
-		<p><label for="period-end">Period end date (optional):</label> <input type="date" id="period-end"></p>
+		<p><label for="period-start">Period start date:</label> <input type="text" id="period-start" data-date-input inputmode="numeric" placeholder="YYYY-MM-DD" autocomplete="off" required></p>
+		<p><label for="period-end">Period end date (optional):</label> <input type="text" id="period-end" data-date-input inputmode="numeric" placeholder="YYYY-MM-DD" autocomplete="off"></p>
 		<p><label class="chip-toggle"><input type="checkbox" id="period-exceptional"> Mark as an exceptional cycle</label></p>
 		<p>
 			<button type="submit" class="btn-primary" disabled>Save period</button>
@@ -230,8 +230,8 @@ window.addEventListener("unhandledrejection",evt => {
 			<span class="calendar-day" data-day="29">29</span><span class="calendar-day" data-day="30">30</span><span class="calendar-day" data-day="31">31</span>
 		</div>
 		<ul class="calendar-legend">
-			<li><img src="/assets/blood-drop-icon-cyan-pink.png" alt="" aria-hidden="true"> Period day</li>
-			<li><img class="projected-period-icon" src="/assets/blood-drop-icon-purple-dark.png" alt="" aria-hidden="true"> Projected period</li>
+			<li><img src="/assets/sprite-6-1.png" alt="" aria-hidden="true"> Period day</li>
+			<li><img class="projected-period-icon" src="/assets/sprite-6-1.png" alt="" aria-hidden="true"> Projected period</li>
 			<li><img src="/assets/moon-icon-full-cyan.png" alt="" aria-hidden="true"> Est. ovulation</li>
 			<li><img src="/assets/calendar-paw-icon.png" alt="" aria-hidden="true"> Medication dose</li>
 		</ul>
@@ -240,7 +240,7 @@ window.addEventListener("unhandledrejection",evt => {
 
 	<section id="medications" class="view-card" aria-live="polite">
 		<div class="view-card-header">
-			<img class="view-icon" src="/assets/potion-drop-icon-peach-purple.png" alt="" aria-hidden="true">
+			<img class="view-icon" src="/assets/sprite-8-6.png" alt="" aria-hidden="true">
 			<h3>Medications</h3>
 		</div>
 		<p id="medication-feedback" aria-live="polite"></p>
@@ -249,8 +249,8 @@ window.addEventListener("unhandledrejection",evt => {
 			<p><label for="medication-name">Name:</label> <input type="text" id="medication-name" maxlength="100"></p>
 			<p><label for="medication-dose">Dose:</label> <input type="text" id="medication-dose" maxlength="50" placeholder="20mg"></p>
 			<p><label for="medication-schedule">Schedule/frequency:</label> <input type="text" id="medication-schedule" maxlength="100" placeholder="daily"></p>
-			<p><label for="medication-start">Start date:</label> <input type="date" id="medication-start"></p>
-			<p><label for="medication-end">End date (optional):</label> <input type="date" id="medication-end"></p>
+			<p><label for="medication-start">Start date:</label> <input type="text" id="medication-start" data-date-input inputmode="numeric" placeholder="YYYY-MM-DD" autocomplete="off"></p>
+			<p><label for="medication-end">End date (optional):</label> <input type="text" id="medication-end" data-date-input inputmode="numeric" placeholder="YYYY-MM-DD" autocomplete="off"></p>
 			<p><label for="medication-notes">Notes (optional):</label> <textarea id="medication-notes" maxlength="500"></textarea></p>
 			<p><button type="button" id="save-medication-btn" class="btn-primary">Save medication</button> <button type="button" id="cancel-medication-btn" class="btn-secondary hidden">Cancel edit</button></p>
 		</div>

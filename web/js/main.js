@@ -63,6 +63,12 @@ async function main() {
 		changePassphraseForm: Boolean(changePassphraseFormEl),
 		restoreBackupForm: Boolean(restoreBackupFormEl),
 	});
+	logDateEntryDiagnostics("controls-initialized");
+	for (let input of document.querySelectorAll("[data-date-input]")) {
+		for (let eventName of ["focus", "input", "change"]) {
+			input.addEventListener(eventName,() => logDateEntryDiagnostics(`${eventName}:${input.id}`),false);
+		}
+	}
 
 	if (!MINIMUM_FEATURES_SUPPORTED) {
 		showUnsupportedBrowserPage();
@@ -237,9 +243,19 @@ async function populateSavedData() {
 		let parsed = data ? JSON.parse(data) : null;
 		periodData = parsed && Array.isArray(parsed.cycles) ? parsed : { version: 2, cycles: [], medications: [], reminders: { medicationTimes: {}, periodDaysBefore: null, }, };
 		if (periodData.version < 2) { periodData = Object.assign(periodData,{ version: 2, medications: [], }); needsMigration = true; }
-		periodData.medications = Array.isArray(periodData.medications) ? periodData.medications : [];
-		periodData.reminders = periodData.reminders || { medicationTimes: {}, periodDaysBefore: null, };
-		periodData.reminders.medicationTimes = periodData.reminders.medicationTimes || {};
+	periodData.medications = Array.isArray(periodData.medications) ? periodData.medications : [];
+	periodData.reminders = periodData.reminders || { medicationTimes: {}, periodDaysBefore: null, };
+	periodData.reminders.medicationTimes = periodData.reminders.medicationTimes || {};
+	console.info("[Moon.Time] medication data loaded",{
+		medicationCount: periodData.medications.length,
+		medications: periodData.medications.map(medication => ({
+			id: medication.id,
+			name: medication.name,
+			startDate: medication.startDate,
+			endDate: medication.endDate || null,
+			adherenceCount: Array.isArray(medication.adherence) ? medication.adherence.length : 0,
+		})),
+	});
 	}
 	catch (err) {
 		periodData = { version: 2, cycles: [], medications: [], reminders: { medicationTimes: {}, periodDaysBefore: null, }, };
@@ -569,8 +585,8 @@ function renderCalendar() {
 		dayEl.setAttribute("aria-label",`${monthName}, ${day}${dayMarkers.length ? `: ${dayMarkers.join(", ")}` : ""}`);
 		let markerEl = document.createElement("span");
 		markerEl.className = "calendar-markers";
-		if (dayMarkers.includes("period")) markerEl.appendChild(calendarIcon("/assets/blood-drop-icon-pink-pale.png","Period day","period-marker"));
-		if (dayMarkers.includes("predicted")) markerEl.appendChild(calendarIcon("/assets/blood-drop-icon-purple-dark.png","Projected period","projected-period-icon"));
+		if (dayMarkers.includes("period")) markerEl.appendChild(calendarIcon("/assets/sprite-6-1.png","Period day","period-marker"));
+		if (dayMarkers.includes("predicted")) markerEl.appendChild(calendarIcon("/assets/sprite-6-1.png","Projected period","projected-period-icon"));
 		if (dayMarkers.includes("fertile")) markerEl.appendChild(calendarIcon("/assets/moon-icon-full-cyan.png","Estimated fertile window","fertile-marker"));
 		if ((periodData.medications || []).some(medication => medicationWasTakenOn(medication,date))) markerEl.appendChild(calendarIcon("/assets/calendar-paw-icon.png","Medication taken","medication-marker"));
 		dayEl.appendChild(markerEl);
@@ -625,6 +641,12 @@ function resetMedicationEditor() {
 
 function renderMedications() {
 	let list = document.getElementById("medication-list");
+	console.info("[Moon.Time] medication setup UI rendered",{
+		sectionPresent: Boolean(document.getElementById("medications")),
+		sectionHidden: document.getElementById("medications")?.classList.contains("hidden") || false,
+		editorPresent: Boolean(document.getElementById("medication-editor")),
+		medicationCount: periodData.medications.length,
+	});
 	list.innerHTML = "";
 	document.getElementById("period-reminder-days").value = Number.isInteger(periodData.reminders.periodDaysBefore) ? periodData.reminders.periodDaysBefore : "";
 	for (let medication of periodData.medications) {
@@ -648,6 +670,14 @@ function renderTodayMedicationLog() {
 		let start = dateFromInput(medication.startDate);
 		let end = dateFromInput(medication.endDate);
 		return start && start <= today && (!end || end >= today);
+	});
+	console.info("[Moon.Time] medication logging UI rendered",{
+		logPresent: true,
+		logHidden: logEl.classList.contains("hidden"),
+		today: dateKey(today),
+		configuredMedicationCount: periodData.medications.length,
+		activeMedicationCount: active.length,
+		activeMedicationNames: active.map(medication => medication.name),
 	});
 	if (!active.length) {
 		let empty = document.createElement("p");
@@ -875,6 +905,7 @@ async function showSavedDataPage() {
 	await populateSavedData();
 	savedDataFormEl.classList.remove("hidden");
 	savedDataFormEl.removeAttribute("inert");
+	logDateEntryDiagnostics("saved-data-visible");
 	var submitBtn = savedDataFormEl.querySelector("button[type=submit]");
 	submitBtn.disabled = false;
 	if (storageManagerPersistSupported()) {
@@ -1030,4 +1061,26 @@ async function onAuthMessage({ data }) {
 		}
 		warn(data.error);
 	}
+}
+
+function logDateEntryDiagnostics(reason) {
+	let dateInputs = [...document.querySelectorAll("[data-date-input]")].map(input => ({
+		id: input.id,
+		type: input.type,
+		value: input.value,
+		disabled: input.disabled,
+		readOnly: input.readOnly,
+		formHidden: input.form?.classList.contains("hidden") || false,
+		formInert: input.form?.hasAttribute("inert") || false,
+		formConnected: Boolean(input.form?.isConnected),
+	}));
+	console.info("[Moon.Time] date-entry diagnostics",{
+		reason,
+		hostname: window.location.hostname,
+		uatQuery: new URLSearchParams(window.location.search).get("uat"),
+		uatMode: UAT_MODE,
+		activeElement: document.activeElement?.id || document.activeElement?.tagName || null,
+		dateInputCount: dateInputs.length,
+		dateInputs,
+	});
 }

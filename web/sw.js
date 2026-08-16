@@ -1,4 +1,4 @@
-const CACHE_NAME = "moon-time-shell-v7";
+const CACHE_NAME = "moon-time-shell-v9";
 const APP_SHELL = [
   "/", "/index.html", "/about.html", "/privacy.html", "/manifest.webmanifest",
   "/css/style.css", "/js/main.js", "/js/browser-support.js", "/js/data-manager.js",
@@ -15,8 +15,7 @@ const APP_SHELL = [
   "/assets/settings-gear-icon-cyan.png", "/assets/bell-icon-gold.png", "/assets/bell-icon-cyan.png",
   "/assets/user-icon-teal.png", "/assets/trend-up-icon-cyan.png", "/assets/undo-icon-left.png",
   "/assets/moon-phase-icon-cyan-glow.png", "/assets/moon-icon-crescent-left-bright.png", "/assets/moon-icon-full-cyan.png",
-	  "/assets/blood-drop-icon-pink-pale.png", "/assets/blood-drop-icon-purple-dark.png", "/assets/blood-drop-icon-cyan-pink.png",
-	  "/assets/potion-drop-icon-peach-lavender.png", "/assets/potion-drop-icon-peach-purple.png",
+	  "/assets/sprite-6-1.png", "/assets/sprite-8-6.png",
 	  "/assets/chevron-left-icon-dark.png", "/assets/chevron-right-icon-slate.png", "/assets/eclipse-ring-icon-icy.png",
 	  "/assets/calendar-paw-icon.png",
 	  "/assets/home-button-gold.png", "/assets/diamond-gem-gold.png",
