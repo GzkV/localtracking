@@ -300,8 +300,8 @@ async function onCreateProfile(evt) {
 			warn("Please enter a profile name/description at least 2 characters long.");
 			return false;
 		}
-		if (passphraseEl.value.length < 12) {
-			warn("Please enter a passphrase at least 12 characters long.");
+		if (passphraseEl.value.length < 5) {
+			warn("Please enter a passphrase at least 5 characters long.");
 			return false;
 		}
 		if (passphraseEl.value !== confirmPassphraseEl.value) {
@@ -357,8 +357,8 @@ async function onLogin(evt) {
 			}
 		}
 
-		if (password.length < 12) {
-			warn("Please login with a passphrase at least 12 characters long.");
+		if (password.length < 5) {
+			warn("Please login with a passphrase at least 5 characters long.");
 			return false;
 		}
 
@@ -399,7 +399,7 @@ async function onRestoreBackup(evt) {
 	cancelEvent(evt);
 	let file = document.getElementById("backup-file").files[0];
 	let passwordEl = document.getElementById("backup-password");
-	if (!file || passwordEl.value.trim().length < 12) { warn("Choose a backup and enter its passphrase (at least 12 characters).",false); return; }
+	if (!file || passwordEl.value.trim().length < 5) { warn("Choose a backup and enter its passphrase (at least 5 characters).",false); return; }
 	try {
 		let backup = JSON.parse(await file.text());
 		if (backup.format !== "Moon.Time encrypted backup" || backup.version !== 1 || !backup.account || !backup.account.keyInfo) throw new Error("Invalid backup");
@@ -751,12 +751,12 @@ function onChangePassphrase(evt) {
 		let newPassphraseEl = changePassphraseFormEl.querySelector("#change-password");
 		let confirmPassphraseEl = changePassphraseFormEl.querySelector("#change-password-confirm");
 
-		if (oldPassphraseEl.value.length < 12) {
-			warn("Please enter a current passphrase at least 12 characters long.");
+		if (oldPassphraseEl.value.length < 5) {
+			warn("Please enter a current passphrase at least 5 characters long.");
 			return false;
 		}
-		if (newPassphraseEl.value.length < 12) {
-			warn("Please enter a new passphrase at least 12 characters long.");
+		if (newPassphraseEl.value.length < 5) {
+			warn("Please enter a new passphrase at least 5 characters long.");
 			return false;
 		}
 		if (newPassphraseEl.value !== confirmPassphraseEl.value) {

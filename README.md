@@ -88,6 +88,6 @@ PRs for this project are welcome. Please check the open issues and discussions b
 
 [![License](https://img.shields.io/badge/license-MIT-a1356a)](LICENSE.txt)
 
-Original YouPeriod.app code and documentation are (c) 2022 YouPeriod.app and released under the [MIT License](http://getify.mit-license.org/). A copy of the MIT License [is also included](LICENSE.txt).
+Original YouPeriod.app code and documentation are (c) 2026 YouPeriod.app and released under the [MIT License](http://getify.mit-license.org/). A copy of the MIT License [is also included](LICENSE.txt).
 
 This code is remixed for noncommercial use in compliance with the MIT License.
