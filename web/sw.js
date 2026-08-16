@@ -14,13 +14,13 @@ const APP_SHELL = [
   "/assets/home-icon-cyan.png", "/assets/calendar-wolf-moon-icon.png", "/assets/calendar-check-icon-cyan.png",
   "/assets/settings-gear-icon-cyan.png", "/assets/bell-icon-gold.png", "/assets/bell-icon-cyan.png",
   "/assets/user-icon-teal.png", "/assets/trend-up-icon-cyan.png", "/assets/undo-icon-left.png",
-  "/assets/moon-phase-icon-cyan-glow.png", "/assets/moon-icon-crescent-left-bright.png", "/assets/moon-icon-full-cyan.png",
+	  "/assets/moon-phase-icon-cyan-glow.png", "/assets/moon-icon-crescent-left-bright.png", "/assets/moon-icon-full-cyan.png",
 	  "/assets/sprite-6-1.png", "/assets/sprite-8-6.png",
 	  "/assets/chevron-left-icon-dark.png", "/assets/chevron-right-icon-slate.png", "/assets/eclipse-ring-icon-icy.png",
 	  "/assets/calendar-paw-icon.png",
 	  "/assets/home-button-gold.png", "/assets/diamond-gem-gold.png",
 	  "/assets/chevron-double-left-gold.png", "/assets/chevron-double-right-gold.png",
-	  "/assets/paw-print-button-gold.png", "/assets/panel-texture-center-gold.png",
+	  "/assets/panel-texture-center-gold.png",
 	  "/assets/wolf-banner-gold.png"
 ];
 self.addEventListener("install", event => event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)).then(() => self.skipWaiting())));

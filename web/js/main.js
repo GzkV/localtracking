@@ -586,9 +586,9 @@ function renderCalendar() {
 		let markerEl = document.createElement("span");
 		markerEl.className = "calendar-markers";
 		if (dayMarkers.includes("period")) markerEl.appendChild(calendarIcon("/assets/sprite-6-1.png","Period day","period-marker"));
-		if (dayMarkers.includes("predicted")) markerEl.appendChild(calendarIcon("/assets/sprite-6-1.png","Projected period","projected-period-icon"));
+		if (dayMarkers.includes("predicted")) markerEl.appendChild(calendarIcon("/assets/calendar-paw-icon.png","Projected period","projected-period-icon"));
 		if (dayMarkers.includes("fertile")) markerEl.appendChild(calendarIcon("/assets/moon-icon-full-cyan.png","Estimated fertile window","fertile-marker"));
-		if ((periodData.medications || []).some(medication => medicationWasTakenOn(medication,date))) markerEl.appendChild(calendarIcon("/assets/calendar-paw-icon.png","Medication taken","medication-marker"));
+		if ((periodData.medications || []).some(medication => medicationWasTakenOn(medication,date))) markerEl.appendChild(calendarIcon("/assets/sprite-8-6.png","Medication taken","medication-marker"));
 		dayEl.appendChild(markerEl);
 		gridEl.appendChild(dayEl);
 	}
@@ -694,7 +694,7 @@ function renderTodayMedicationLog() {
 		button.dataset.action = "taken";
 		button.dataset.id = medication.id;
 		button.disabled = taken;
-		button.innerHTML = `<img src="/assets/paw-print-button-gold.png" alt=""> <span>${medication.name}</span><small>${taken ? "logged" : medication.dose}</small>`;
+		button.innerHTML = `<img src="/assets/sprite-8-6.png" alt=""> <span>${medication.name}</span><small>${taken ? "logged" : medication.dose}</small>`;
 		button.querySelector("img").addEventListener("error",evt => { evt.currentTarget.replaceWith(document.createTextNode("🐾")); },{ once: true, });
 		button.setAttribute("aria-label",`${medication.name}: ${taken ? "dose logged today" : "mark dose taken today"}`);
 		logEl.appendChild(button);

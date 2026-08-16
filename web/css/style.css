@@ -446,8 +446,6 @@ button:disabled {
 	gap: 0.12em;
 }
 .calendar-markers img { width: 1.05em; height: 1.05em; object-fit: contain; }
-.calendar-markers .projected-period-icon,
-.calendar-legend .projected-period-icon { filter: saturate(2.2) hue-rotate(295deg) brightness(0.9); }
 .calendar-markers .medication-marker { image-rendering: pixelated; }
 
 .today-dose-log {

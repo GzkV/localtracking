@@ -39,7 +39,7 @@ Art assets live in [`assets-src/werewolf/item-pack/`](../assets-src/werewolf/ite
 
 **Relevant code/assets:**
 - [`web/index.html`](../web/index.html) (`#saved-data`, `#prediction`, `#period-list`), [`web/js/main.js`](../web/js/main.js), [`web/js/data-manager.js`](../web/js/data-manager.js), [`web/js/period-prediction.js`](../web/js/period-prediction.js).
-- Icons: `home-button-gold.png` (home nav), `blood-drop-icon-pink-pale.png` (period log), `paw-print-button-gold.png` (medication dose), and `moon-phase-icon-cyan-glow.png` (prediction card). Gold panel texture and the diamond gem are used for the dashboard profile chrome.
+- Icons: `home-button-gold.png` (home nav), `blood-drop-icon-pink-pale.png` (period log), `sprite-8-6.png` (medication nav and dose UI), and `moon-phase-icon-cyan-glow.png` (prediction card). Gold panel texture and the diamond gem are used for the dashboard profile chrome.
 
 ---
 
@@ -71,7 +71,7 @@ Art assets live in [`assets-src/werewolf/item-pack/`](../assets-src/werewolf/ite
 
 **Relevant code/assets:**
 - [`web/js/period-prediction.js`](../web/js/period-prediction.js) (`predict()` returns `{ available, typical, min, max, confidence, date, error }`; exceptional cycles excluded via the `exceptional` flag).
-- Icons: `calendar-icon-grid.png`, `calendar-check-icon-cyan.png`, `calendar-wolf-moon-icon.png` (header/nav), `blood-drop-icon-pink-pale.png` (projected period), `calendar-paw-icon.png` (medication adherence), and the moon-phase set (`moon-icon-new.png` … `moon-icon-full.png`) for cycle/fertile indicators.
+- Icons: `calendar-icon-grid.png`, `calendar-paw-icon.png` (projected period), `calendar-wolf-moon-icon.png` (header/nav), `sprite-8-6.png` (medication adherence), and the moon-phase set (`moon-icon-new.png` … `moon-icon-full.png`) for cycle/fertile indicators.
 
 ---
 
