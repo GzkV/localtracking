@@ -244,6 +244,43 @@ form textarea {
 }
 label { color: rgb(var(--color-text-dim)); }
 
+.profile-icon-picker {
+	margin: 1em 0;
+	padding: 0.7em;
+	border: 1px solid rgba(var(--color-slate), 0.6);
+	border-radius: 0.6em;
+}
+.profile-icon-picker legend { padding: 0 0.35em; color: rgb(var(--color-text-dim)); }
+.profile-icon-options {
+	display: grid;
+	grid-template-columns: repeat(4, minmax(4em, 1fr));
+	gap: 0.6em;
+}
+.profile-icon-option {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.2em;
+	padding: 0.35em;
+	border: 2px solid transparent;
+	border-radius: 0.6em;
+	text-align: center;
+	cursor: pointer;
+}
+.profile-icon-option:has(input:checked) {
+	border-color: rgba(var(--color-cyan), 0.85);
+	background: rgba(var(--color-night-3), 0.7);
+}
+.profile-icon-option input { margin: 0; }
+.profile-icon-option img { width: 3.2em; height: 3.2em; }
+.tracker-icon-picker { margin: 1em 0; padding: 0.7em; border: 1px solid rgba(var(--color-slate), 0.6); border-radius: 0.6em; }
+.tracker-icon-picker legend { padding: 0 0.35em; color: rgb(var(--color-text-dim)); }
+.tracker-icon-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(4.5em, 1fr)); gap: 0.5em; }
+.tracker-icon-option { display: flex; flex-direction: column; align-items: center; gap: 0.2em; padding: 0.35em; border: 2px solid transparent; border-radius: 0.6em; cursor: pointer; text-align: center; }
+.tracker-icon-option:has(input:checked) { border-color: rgba(var(--color-cyan), 0.85); background: rgba(var(--color-night-3), 0.7); }
+.tracker-icon-option input { margin: 0; }
+.tracker-icon-option img { width: 2.8em; height: 2.8em; object-fit: contain; }
+
 /* ---------- buttons ---------- */
 
 button {
@@ -315,6 +352,12 @@ button:disabled {
 	border-left: 0.25em solid rgba(var(--color-pink), 0.7);
 	border-radius: 0.5em;
 }
+#tracker-list { list-style: none; padding: 0; }
+#tracker-list li { margin-bottom: 0.7em; padding: 0.6em 0.8em; background: rgba(var(--color-night-0), 0.55); border: 1px solid rgba(var(--color-slate), 0.4); border-left: 0.25em solid rgba(var(--color-cyan), 0.8); border-radius: 0.5em; }
+#tracker-list button { margin: 0.2em; }
+#tracker-list .tracker-card-head { display: flex; align-items: center; gap: 0.6em; }
+#tracker-list .tracker-card-head img { width: 2em; height: 2em; object-fit: contain; }
+#tracker-list .tracker-notes, #tracker-list .tracker-history { display: block; color: rgb(var(--color-text-dim)); font-size: 0.85em; }
 #medication-list li {
 	border-left-color: rgba(var(--color-lavender), 0.8);
 }
@@ -447,12 +490,18 @@ button:disabled {
 }
 .calendar-markers img { width: 1.05em; height: 1.05em; object-fit: contain; }
 .calendar-markers .medication-marker { image-rendering: pixelated; }
+.calendar-markers .tracker-marker { image-rendering: pixelated; }
 
 .today-dose-log {
 	margin-top: 1em;
 	padding-top: 0.8em;
 	border-top: 1px dashed rgba(var(--color-gold), 0.45);
 }
+.today-tracker-log { margin-top: 1em; padding-top: 0.8em; border-top: 1px dashed rgba(var(--color-cyan), 0.45); }
+.today-tracker-log h4 { margin: 0; color: rgb(var(--color-cyan)); }
+.tracker-checklist { display: grid; grid-template-columns: repeat(auto-fit, minmax(11em, 1fr)); gap: 0.5em; }
+.tracker-check { display: flex; align-items: center; gap: 0.45em; padding: 0.45em; border: 1px solid rgba(var(--color-slate), 0.55); border-radius: 0.5em; background: rgba(var(--color-night-0), 0.55); cursor: pointer; }
+.tracker-check img { width: 1.7em; height: 1.7em; object-fit: contain; }
 .today-dose-log h4 { margin: 0; color: rgb(var(--color-gold)); }
 .dose-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(10em, 1fr)); gap: 0.6em; }
 .dose-rune {
@@ -604,4 +653,5 @@ main[inert], header[inert], footer[inert] {
 	.site-header { justify-content: center; text-align: center; }
 	.corner-motif { width: 2.2em; }
 	.calendar-grid { gap: 0.15em; }
+	.profile-icon-options { grid-template-columns: repeat(2, minmax(4em, 1fr)); }
 }

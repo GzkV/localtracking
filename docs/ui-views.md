@@ -139,6 +139,14 @@ Art assets live in [`assets-src/werewolf/item-pack/`](../assets-src/werewolf/ite
 
 ---
 
+## 6a. Generic Tracker Management and Quick Log
+
+The dashboard quick log (`#today-tracker-log`) provides a date, multi-select checkbox list, shared note, and one log action. The Trackers section (`#trackers`) provides a name, explicit allowlisted icon picker from [`web/assets/misc-tracking/`](../web/assets/misc-tracking/), bounded configuration notes, an optional daily time, and edit/delete cards with recent history.
+
+Encrypted data uses `trackers` records shaped as `{ id, name, icon, notes, entries }`; each entry stores `date`, `timestamp`, and optional `note`. Reminder times are stored in `reminders.trackerTimes` keyed by tracker id. Tracker activity is aggregated into the calendar without changing period or medication markers. Tracker reminders use the existing foreground Notification API and are not background push or guaranteed delivery when the app is closed.
+
+---
+
 ## 7. Settings
 
 **Purpose:** Account/security and app preferences.

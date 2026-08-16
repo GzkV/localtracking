@@ -196,6 +196,10 @@ function scheduleReminders(data, prediction) {
 		let time = data.reminders && data.reminders.medicationTimes && data.reminders.medicationTimes[medication.id];
 		if (time) scheduleDaily(medication, time, now);
 	}
+	for (let tracker of data.trackers || []) {
+		let time = data.reminders && data.reminders.trackerTimes && data.reminders.trackerTimes[tracker.id];
+		if (time) scheduleDailyTracker(tracker,time,now);
+	}
 	let days = data.reminders && data.reminders.periodDaysBefore;
 	if (prediction && prediction.available && Number.isInteger(days) && days >= 0) {
 		let when = new Date(`${prediction.date}T09:00:00`);
@@ -215,6 +219,17 @@ function scheduleDaily(medication, time, now) {
 	reminderTimers.push(setTimeout(() => {
 		new Notification(`Medication reminder: ${medication.name}`, { body: `${medication.dose} — ${medication.schedule}`, tag: `medication-${medication.id}` });
 		scheduleDaily(medication,time,new Date());
+	}, when - now));
+}
+
+function scheduleDailyTracker(tracker,time,now) {
+	let [hours, minutes] = time.split(":").map(Number);
+	if (!Number.isInteger(hours) || !Number.isInteger(minutes)) return;
+	let when = new Date(now); when.setHours(hours,minutes,0,0);
+	if (when <= now) when.setDate(when.getDate() + 1);
+	reminderTimers.push(setTimeout(() => {
+		new Notification(`Tracker reminder: ${tracker.name}`, { body: `Log ${tracker.name} in Moon.Time.`, tag: `tracker-${tracker.id}` });
+		scheduleDailyTracker(tracker,time,new Date());
 	}, when - now));
 }
 

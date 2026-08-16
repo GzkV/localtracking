@@ -39,6 +39,7 @@ async function getEncryptedAccount(accountID) {
 	if (!account) return;
 	return {
 		profileName: account.profileName,
+		profileIcon: account.profileIcon,
 		loginChallenge: account.loginChallenge,
 		keyInfo: account.keyInfo,
 		data: account.data,

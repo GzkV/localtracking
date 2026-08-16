@@ -24,6 +24,12 @@ Once installed, this web-app (PWA) is designed to run locally and continue worki
 
 That means that an installed version can remain functional when the server is unavailable, subject to browser storage, service-worker, and device limitations. A first visit or an update still requires the app's files to be available for download.
 
+## Generic Trackers and Reminders
+
+The Trackers view lets users define multiple private things to track (for example migraines, symptoms, or intimacy), choose an allowlisted icon, add configuration notes, and optionally set a daily reminder. The dashboard quick log supports selecting several configured trackers and recording them together for a date with one shared note. Tracker definitions and entries are encrypted with the rest of the profile data, and tracker activity appears as a compact calendar marker.
+
+Daily medication and tracker reminders use the browser Notification API and are scheduled while Moon.Time is in the foreground. They do not promise background delivery when the app or browser is closed.
+
 ## Local Prediction
 
 The current prediction approach runs entirely in the browser. It derives a typical cycle length from the user's recorded, non-exceptional cycles, ignores invalid or implausible intervals, and reports an estimated date together with a range and a qualitative confidence level. Recorded data is not sent to a prediction server.

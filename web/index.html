@@ -96,6 +96,31 @@ window.addEventListener("unhandledrejection",evt => {
 	<p>
 		<input type="password" id="register-password-confirm" size="30" placeholder="confirm secret phrase" autocomplete="new-password">
 	</p>
+	<fieldset class="profile-icon-picker">
+		<legend>Choose a profile icon</legend>
+		<div class="profile-icon-options" role="radiogroup" aria-label="Profile icon options">
+			<label class="profile-icon-option">
+				<input type="radio" name="profile-icon" value="/assets/wolf-icon-charcoal-front.png" aria-label="Charcoal wolf" checked>
+				<img src="/assets/wolf-icon-charcoal-front.png" alt="Charcoal wolf">
+				<span>Charcoal</span>
+			</label>
+			<label class="profile-icon-option">
+				<input type="radio" name="profile-icon" value="/assets/wolf-icon-lavender-front.png" aria-label="Lavender wolf">
+				<img src="/assets/wolf-icon-lavender-front.png" alt="Lavender wolf">
+				<span>Lavender</span>
+			</label>
+			<label class="profile-icon-option">
+				<input type="radio" name="profile-icon" value="/assets/wolf-icon-silver-front.png" aria-label="Silver wolf">
+				<img src="/assets/wolf-icon-silver-front.png" alt="Silver wolf">
+				<span>Silver</span>
+			</label>
+			<label class="profile-icon-option">
+				<input type="radio" name="profile-icon" value="/assets/wolf-icon-teal-front.png" aria-label="Teal wolf">
+				<img src="/assets/wolf-icon-teal-front.png" alt="Teal wolf">
+				<span>Teal</span>
+			</label>
+		</div>
+	</fieldset>
 	<p>
 		<button type="submit" class="btn-primary" disabled>Create Local Profile</button>
 	</p>
@@ -164,13 +189,14 @@ window.addEventListener("unhandledrejection",evt => {
 			<li><a href="#calendar-view"><img class="nav-icon" src="/assets/calendar-wolf-moon-icon.png" alt="" aria-hidden="true">Calendar</a></li>
 			<li><a href="#prediction"><img class="nav-icon" src="/assets/trend-up-icon-cyan.png" alt="" aria-hidden="true">Trends</a></li>
 			<li><a href="#medications"><img class="nav-icon" src="/assets/sprite-8-6.png" alt="" aria-hidden="true">Medications</a></li>
+			<li><a href="#trackers"><img class="nav-icon" src="/assets/misc-tracking/paw-print-motif-cyan.png" alt="" aria-hidden="true">Trackers</a></li>
 			<li><a href="#reminders-section"><img class="nav-icon" src="/assets/bell-icon-gold.png" alt="" aria-hidden="true">Reminders</a></li>
 			<li><a href="#settings-section"><img class="nav-icon" src="/assets/settings-gear-icon-cyan.png" alt="" aria-hidden="true">Settings</a></li>
 		</ul>
 	</nav>
 
 	<section id="dashboard-section" class="view-card profile-bar gold-panel">
-		<img class="profile-avatar" src="/assets/wolf-avatar-howling-moon.png" alt="" aria-hidden="true">
+		<img id="profile-avatar" class="profile-avatar" src="/assets/wolf-avatar-howling-moon.png" alt="" aria-hidden="true">
 		<img class="profile-gem" src="/assets/diamond-gem-gold.png" alt="" aria-hidden="true">
 		<p>
 			Profile: <strong><span id="profile-label"></span></strong>
@@ -192,6 +218,14 @@ window.addEventListener("unhandledrejection",evt => {
 			<h4>Medication runes</h4>
 			<p class="privacy-note">Tap a paw to mark a scheduled dose taken today.</p>
 			<div id="today-medication-log" class="dose-grid"></div>
+		</div>
+		<div class="today-tracker-log">
+			<h4>Other things to track</h4>
+			<p class="privacy-note">Select any combination and log them together for the chosen date.</p>
+			<p><label for="tracker-log-date">Log date:</label> <input type="text" id="tracker-log-date" data-date-input inputmode="numeric" placeholder="YYYY-MM-DD" autocomplete="off"></p>
+			<div id="today-tracker-log" class="tracker-checklist"></div>
+			<p><label for="tracker-log-note">Shared note (optional):</label> <textarea id="tracker-log-note" maxlength="500"></textarea></p>
+			<p><button type="button" id="log-trackers-btn" class="btn-primary">Log selected trackers</button></p>
 		</div>
 	</section>
 
@@ -234,6 +268,7 @@ window.addEventListener("unhandledrejection",evt => {
 			<li><img class="projected-period-icon" src="/assets/calendar-paw-icon.png" alt="" aria-hidden="true"> Projected period</li>
 			<li><img src="/assets/moon-icon-full-cyan.png" alt="" aria-hidden="true"> Est. ovulation</li>
 			<li><img src="/assets/sprite-8-6.png" alt="" aria-hidden="true"> Medication dose</li>
+			<li><img src="/assets/misc-tracking/paw-print-motif-cyan.png" alt="" aria-hidden="true"> Tracker activity</li>
 		</ul>
 		<p class="privacy-note">Predictions are estimates only — not contraception or medical advice. Confidence reflects how much consistent history is available.</p>
 	</section>
@@ -255,6 +290,24 @@ window.addEventListener("unhandledrejection",evt => {
 			<p><button type="button" id="save-medication-btn" class="btn-primary">Save medication</button> <button type="button" id="cancel-medication-btn" class="btn-secondary hidden">Cancel edit</button></p>
 		</div>
 		<ul id="medication-list"></ul>
+	</section>
+
+	<section id="trackers" class="view-card" aria-live="polite">
+		<div class="view-card-header">
+			<img class="view-icon" src="/assets/misc-tracking/paw-print-motif-cyan.png" alt="" aria-hidden="true">
+			<h3>Track anything</h3>
+		</div>
+		<p class="privacy-note">Create your own private trackers for migraines, intimacy, symptoms, or anything else. A tracker definition is separate from its daily log entries.</p>
+		<p id="tracker-feedback" aria-live="polite"></p>
+		<div id="tracker-editor">
+			<input type="hidden" id="tracker-id">
+			<p><label for="tracker-name">Name:</label> <input type="text" id="tracker-name" maxlength="100"></p>
+			<fieldset class="tracker-icon-picker"><legend>Choose an icon</legend><div id="tracker-icon-options" class="tracker-icon-options"></div></fieldset>
+			<p><label for="tracker-notes">Notes (optional):</label> <textarea id="tracker-notes" maxlength="500"></textarea></p>
+			<p><label for="tracker-reminder-time">Daily reminder (optional):</label> <input type="time" id="tracker-reminder-time"></p>
+			<p><button type="button" id="save-tracker-btn" class="btn-primary">Save tracker</button> <button type="button" id="cancel-tracker-btn" class="btn-secondary hidden">Cancel edit</button></p>
+		</div>
+		<ul id="tracker-list"></ul>
 	</section>
 
 	<section id="reminders-section" class="view-card">

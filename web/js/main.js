@@ -12,6 +12,22 @@ const UAT_MODE = (
 	["localhost","127.0.0.1","::1"].includes(window.location.hostname)
 );
 const UAT_ACCOUNT_ID = "localtracking-uat-testing";
+const DEFAULT_PROFILE_ICON = "/assets/wolf-avatar-howling-moon.png";
+const PROFILE_ICONS = new Set([
+	"/assets/wolf-icon-charcoal-front.png",
+	"/assets/wolf-icon-lavender-front.png",
+	"/assets/wolf-icon-silver-front.png",
+	"/assets/wolf-icon-teal-front.png",
+]);
+const TRACKER_ICONS = new Map([
+	["/assets/misc-tracking/lightning-icon-cyan-alt.png","Lightning"],
+	["/assets/misc-tracking/paw-print-motif-cyan.png","Cyan paw print"],
+	["/assets/misc-tracking/paw-print-motif-gold.png","Gold paw print"],
+	["/assets/misc-tracking/sprite-6-4.png","Tracker symbol"],
+	["/assets/misc-tracking/sprite-8-6.png","Tracker badge"],
+	["/assets/misc-tracking/wolf-avatar-amber-eyes.png","Amber-eyed wolf"],
+	["/assets/misc-tracking/wolf-avatar-gray-snarl.png","Gray wolf"],
+]);
 var createProfileFormEl;
 var passphraseSuggestionFormEl;
 var loginFormEl;
@@ -20,6 +36,7 @@ var changePassphraseFormEl;
 var restoreBackupFormEl;
 var profileNameSelectorEl;
 var profileLabelEl;
+var profileAvatarEl;
 var authWorker;
 var tmpDataBackup = UNSET;
 var currentKeyText;
@@ -54,6 +71,7 @@ async function main() {
 	restoreBackupFormEl = document.getElementById("restore-backup");
 	profileNameSelectorEl = document.getElementById("profile-names");
 	profileLabelEl = document.getElementById("profile-label");
+	profileAvatarEl = document.getElementById("profile-avatar");
 
 	NotificationManager.init(bodyEl);
 	console.info("[Moon.Time] controls initialized",{
@@ -98,6 +116,11 @@ async function main() {
 		document.getElementById("cancel-medication-btn").addEventListener("click",resetMedicationEditor,false);
 		document.getElementById("medication-list").addEventListener("click",onMedicationAction,false);
 		document.getElementById("today-medication-log").addEventListener("click",onMedicationAction,false);
+		document.getElementById("save-tracker-btn").addEventListener("click",onSaveTracker,false);
+		document.getElementById("cancel-tracker-btn").addEventListener("click",resetTrackerEditor,false);
+		document.getElementById("tracker-list").addEventListener("click",onTrackerAction,false);
+		document.getElementById("log-trackers-btn").addEventListener("click",onLogTrackers,false);
+		document.getElementById("tracker-log-date").addEventListener("change",renderTodayTrackerLog,false);
 		document.getElementById("period-reminder-days").addEventListener("change",onReminderSettingsChange,false);
 		document.getElementById("request-notification-btn").addEventListener("click",onRequestNotifications,false);
 		document.querySelector('[data-calendar="prev"]').addEventListener("click",() => changeCalendarMonth(-1),false);
@@ -170,7 +193,7 @@ async function ensureTestingAccount() {
 	}
 }
 
-async function addProfileAccount(profileName,accountID) {
+async function addProfileAccount(profileName,accountID,profileIcon) {
 	var [ profiles, accounts, ] = await Promise.all([
 		getProfiles(),
 		getAccounts(),
@@ -178,7 +201,7 @@ async function addProfileAccount(profileName,accountID) {
 
 	if (!(profileName in profiles)) {
 		profiles[profileName] = accountID;
-		accounts[accountID] = { profileName, };
+		accounts[accountID] = { profileName, profileIcon: normalizeProfileIcon(profileIcon), };
 		try {
 			await Promise.all([
 				idbKeyval.set("profiles",profiles),
@@ -229,23 +252,40 @@ function populateProfileSelector(profiles) {
 	}
 }
 
+function normalizeProfileIcon(profileIcon) {
+	return PROFILE_ICONS.has(profileIcon) ? profileIcon : DEFAULT_PROFILE_ICON;
+}
+
+function normalizeTracker(tracker) {
+	return {
+		id: String(tracker.id || crypto.randomUUID()), name: String(tracker.name || "Tracker").slice(0,100),
+		icon: TRACKER_ICONS.has(tracker.icon) ? tracker.icon : TRACKER_ICONS.keys().next().value,
+		notes: String(tracker.notes || "").slice(0,500),
+		entries: Array.isArray(tracker.entries) ? tracker.entries.filter(entry => entry && dateFromInput(entry.date)).map(entry => ({ date: entry.date, timestamp: entry.timestamp || new Date().toISOString(), note: String(entry.note || "").slice(0,500) })) : [],
+	};
+}
+
 async function populateSavedData() {
 	setProfileName: {
 		let accounts = await getAccounts();
 		let accountID = sessionStorage.getItem("current-account-id");
 		let account = accounts[accountID];
 		profileLabelEl.innerText = account.profileName;
+		profileAvatarEl.src = normalizeProfileIcon(account.profileIcon);
 	}
 
 	let data = await DataManager.getData(undefined,currentKeyText);
 	let needsMigration = false;
 	try {
 		let parsed = data ? JSON.parse(data) : null;
-		periodData = parsed && Array.isArray(parsed.cycles) ? parsed : { version: 2, cycles: [], medications: [], reminders: { medicationTimes: {}, periodDaysBefore: null, }, };
+		periodData = parsed && Array.isArray(parsed.cycles) ? parsed : { version: 3, cycles: [], medications: [], trackers: [], reminders: { medicationTimes: {}, trackerTimes: {}, periodDaysBefore: null, }, };
 		if (periodData.version < 2) { periodData = Object.assign(periodData,{ version: 2, medications: [], }); needsMigration = true; }
 	periodData.medications = Array.isArray(periodData.medications) ? periodData.medications : [];
+	periodData.trackers = Array.isArray(periodData.trackers) ? periodData.trackers.map(normalizeTracker) : [];
 	periodData.reminders = periodData.reminders || { medicationTimes: {}, periodDaysBefore: null, };
 	periodData.reminders.medicationTimes = periodData.reminders.medicationTimes || {};
+	periodData.reminders.trackerTimes = periodData.reminders.trackerTimes || {};
+	if (periodData.version < 3) { periodData.version = 3; needsMigration = true; }
 	console.info("[Moon.Time] medication data loaded",{
 		medicationCount: periodData.medications.length,
 		medications: periodData.medications.map(medication => ({
@@ -258,11 +298,14 @@ async function populateSavedData() {
 	});
 	}
 	catch (err) {
-		periodData = { version: 2, cycles: [], medications: [], reminders: { medicationTimes: {}, periodDaysBefore: null, }, };
+		periodData = { version: 3, cycles: [], medications: [], trackers: [], reminders: { medicationTimes: {}, trackerTimes: {}, periodDaysBefore: null, }, };
 	}
 	renderPeriods();
 	renderMedications();
 	renderTodayMedicationLog();
+	renderTrackerIcons();
+	renderTrackers();
+	renderTodayTrackerLog();
 	calendarMonth = new Date(new Date().getFullYear(),new Date().getMonth(),1);
 	renderCalendar();
 	if (needsMigration) await DataManager.saveData(JSON.stringify(periodData),undefined,currentKeyText);
@@ -296,6 +339,7 @@ async function onCreateProfile(evt) {
 		let profileNameEl = createProfileFormEl.querySelector("#register-profile-name");
 		let passphraseEl = createProfileFormEl.querySelector("#register-password");
 		let confirmPassphraseEl = createProfileFormEl.querySelector("#register-password-confirm");
+		let profileIcon = createProfileFormEl.querySelector("input[name=profile-icon]:checked").value;
 		if (profileNameEl.value.length < 2) {
 			warn("Please enter a profile name/description at least 2 characters long.");
 			return false;
@@ -310,7 +354,7 @@ async function onCreateProfile(evt) {
 		}
 
 		let accountID = self.crypto.randomUUID();
-		let res = await addProfileAccount(profileNameEl.value,accountID);
+		let res = await addProfileAccount(profileNameEl.value,accountID,profileIcon);
 		if (!res) {
 			warn("Could not add a profile with the given name/description.");
 			return false;
@@ -427,7 +471,7 @@ async function restoreVerifiedBackup(keyText) {
 		targetID = crypto.randomUUID();
 		if (profiles[profileName]) throw new Error("That profile name is already in use");
 	}
-	accounts[targetID] = Object.assign({},backup.account,{ profileName, });
+	accounts[targetID] = Object.assign({},backup.account,{ profileName, profileIcon: normalizeProfileIcon(backup.account.profileIcon), });
 	profiles[profileName] = targetID;
 	await Promise.all([idbKeyval.set("profiles",profiles),idbKeyval.set("accounts",accounts)]);
 	populateProfileSelector(profiles);
@@ -472,7 +516,7 @@ async function onSaveData(evt) {
 		periodData.cycles.push({ start: startEl.value, end: endEl.value || null, exceptional: savedDataFormEl.querySelector("#period-exceptional").checked, });
 		periodData.cycles.sort((a,b) => a.start.localeCompare(b.start));
 		try {
-			periodData.version = 2;
+			periodData.version = 3;
 			let res = await DataManager.saveData(JSON.stringify(periodData),undefined,currentKeyText);
 			if (res) {
 				startEl.value = "";
@@ -515,8 +559,11 @@ function changeCalendarMonth(offset) {
 }
 
 function dateFromInput(value) {
-	let parts = String(value || "").split("-").map(Number);
-	return parts.length === 3 && parts.every(Number.isFinite) ? new Date(parts[0],parts[1] - 1,parts[2]) : null;
+	let match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(value || ""));
+	if (!match) return null;
+	let year = Number(match[1]), month = Number(match[2]), day = Number(match[3]);
+	let date = new Date(year,month - 1,day);
+	return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day ? date : null;
 }
 
 function dateKey(date) {
@@ -569,6 +616,10 @@ function renderCalendar() {
 			if (takenDate >= monthStart && takenDate <= monthEnd) addDateRange(markers,takenDate,takenDate,"medication");
 		}
 	}
+	for (let tracker of periodData.trackers || []) for (let entry of tracker.entries || []) {
+		let loggedDate = dateFromInput(entry.date);
+		if (loggedDate && loggedDate >= monthStart && loggedDate <= monthEnd) addDateRange(markers,loggedDate,loggedDate,"tracker");
+	}
 	let firstDay = new Date(year,month,1);
 	let leadingBlanks = (firstDay.getDay() + 6) % 7;
 	for (let index = 0; index < leadingBlanks; index++) appendBlank();
@@ -589,6 +640,7 @@ function renderCalendar() {
 		if (dayMarkers.includes("predicted")) markerEl.appendChild(calendarIcon("/assets/calendar-paw-icon.png","Projected period","projected-period-icon"));
 		if (dayMarkers.includes("fertile")) markerEl.appendChild(calendarIcon("/assets/moon-icon-full-cyan.png","Estimated fertile window","fertile-marker"));
 		if ((periodData.medications || []).some(medication => medicationWasTakenOn(medication,date))) markerEl.appendChild(calendarIcon("/assets/sprite-8-6.png","Medication taken","medication-marker"));
+		if (dayMarkers.includes("tracker")) markerEl.appendChild(calendarIcon("/assets/misc-tracking/paw-print-motif-cyan.png","Tracker activity","tracker-marker"));
 		dayEl.appendChild(markerEl);
 		gridEl.appendChild(dayEl);
 	}
@@ -610,6 +662,68 @@ function renderCalendar() {
 		icon.addEventListener("error",evt => { evt.currentTarget.replaceWith(document.createTextNode("🐾")); },{ once: true, });
 		return icon;
 	}
+}
+
+function renderTrackerIcons(selected) {
+	let options = document.getElementById("tracker-icon-options");
+	if (!options) return;
+	options.innerHTML = "";
+	for (let [src,label] of TRACKER_ICONS) {
+		let wrapper = document.createElement("label"); wrapper.className = "tracker-icon-option";
+		let input = document.createElement("input"); input.type = "radio"; input.name = "tracker-icon"; input.value = src; input.checked = src === (selected || TRACKER_ICONS.keys().next().value); input.setAttribute("aria-label",label);
+		let image = document.createElement("img"); image.src = src; image.alt = label;
+		wrapper.append(input,image,document.createTextNode(label)); options.appendChild(wrapper);
+	}
+}
+
+function renderTrackers() {
+	let list = document.getElementById("tracker-list"); if (!list) return; list.innerHTML = "";
+	for (let tracker of periodData.trackers) {
+		let item = document.createElement("li"), head = document.createElement("div"); head.className = "tracker-card-head";
+		let image = document.createElement("img"); image.src = tracker.icon; image.alt = ""; image.setAttribute("aria-hidden","true");
+		head.append(image,document.createTextNode(tracker.name)); item.appendChild(head);
+		if (tracker.notes) { let notes = document.createElement("span"); notes.className = "tracker-notes"; notes.innerText = tracker.notes; item.appendChild(notes); }
+		let reminder = document.createElement("span"); reminder.className = "tracker-history"; reminder.innerText = periodData.reminders.trackerTimes[tracker.id] ? `Daily reminder: ${periodData.reminders.trackerTimes[tracker.id]}` : "No daily reminder"; item.appendChild(reminder);
+		let history = document.createElement("span"); history.className = "tracker-history"; history.innerText = `Recent logs: ${(tracker.entries || []).slice(-3).reverse().map(entry => `${entry.date}${entry.note ? ` — ${entry.note}` : ""}`).join("; ") || "none"}`; item.appendChild(history);
+		for (let [label,action] of [["Edit","edit"],["Delete","delete"]]) { let button = document.createElement("button"); button.type = "button"; button.dataset.action = action; button.dataset.id = tracker.id; button.innerText = label; item.appendChild(button); }
+		list.appendChild(item);
+	}
+}
+
+function renderTodayTrackerLog() {
+	let log = document.getElementById("today-tracker-log"); if (!log) return;
+	let dateInput = document.getElementById("tracker-log-date"); if (!dateInput.value) dateInput.value = dateKey(new Date()); log.innerHTML = "";
+	if (!periodData.trackers.length) { let empty = document.createElement("p"); empty.className = "empty-state"; empty.innerText = "Create a tracker below to add it to the quick log."; log.appendChild(empty); return; }
+	for (let tracker of periodData.trackers) {
+		let label = document.createElement("label"); label.className = "tracker-check";
+		let input = document.createElement("input"); input.type = "checkbox"; input.value = tracker.id; input.checked = (tracker.entries || []).some(entry => entry.date === dateInput.value);
+		let image = document.createElement("img"); image.src = tracker.icon; image.alt = ""; image.setAttribute("aria-hidden","true"); label.append(input,image,document.createTextNode(tracker.name)); log.appendChild(label);
+	}
+}
+
+async function onSaveTracker() {
+	let id = document.getElementById("tracker-id").value, name = document.getElementById("tracker-name").value.trim();
+	if (!name) { warn("Please enter a tracker name."); return; }
+	let old = periodData.trackers.find(item => item.id === id), tracker = normalizeTracker({ id: id || crypto.randomUUID(), name, icon: document.querySelector('input[name="tracker-icon"]:checked')?.value, notes: document.getElementById("tracker-notes").value.trim(), entries: old ? old.entries : [] });
+	periodData.trackers = periodData.trackers.filter(item => item.id !== tracker.id).concat(tracker);
+	periodData.reminders.trackerTimes[tracker.id] = document.getElementById("tracker-reminder-time").value;
+	if (await persistData("Tracker saved (encrypted) successfully.")) resetTrackerEditor();
+}
+
+function resetTrackerEditor() { document.getElementById("tracker-id").value = ""; document.getElementById("tracker-name").value = ""; document.getElementById("tracker-notes").value = ""; document.getElementById("tracker-reminder-time").value = ""; document.getElementById("cancel-tracker-btn").classList.add("hidden"); renderTrackerIcons(); }
+
+async function onTrackerAction(evt) {
+	let button = evt.target.closest("button[data-action]"); if (!button) return;
+	let tracker = periodData.trackers.find(item => item.id === button.dataset.id); if (!tracker) return;
+	if (button.dataset.action === "delete") { periodData.trackers = periodData.trackers.filter(item => item.id !== tracker.id); delete periodData.reminders.trackerTimes[tracker.id]; await persistData("Tracker deleted (encrypted) successfully."); }
+	else { document.getElementById("tracker-id").value = tracker.id; document.getElementById("tracker-name").value = tracker.name; document.getElementById("tracker-notes").value = tracker.notes; document.getElementById("tracker-reminder-time").value = periodData.reminders.trackerTimes[tracker.id] || ""; document.getElementById("cancel-tracker-btn").classList.remove("hidden"); renderTrackerIcons(tracker.icon); }
+}
+
+async function onLogTrackers() {
+	let date = document.getElementById("tracker-log-date").value, selected = [...document.querySelectorAll("#today-tracker-log input:checked")].map(input => input.value), note = document.getElementById("tracker-log-note").value.trim();
+	if (!dateFromInput(date) || !selected.length) { warn("Choose a valid date and at least one tracker."); return; }
+	for (let tracker of periodData.trackers) if (selected.includes(tracker.id)) { tracker.entries = (tracker.entries || []).filter(entry => entry.date !== date); tracker.entries.push({ date, timestamp: new Date().toISOString(), note }); }
+	document.getElementById("tracker-log-note").value = ""; await persistData("Tracker activity logged (encrypted) successfully.");
 }
 
 async function onSaveMedication() {
@@ -726,7 +840,7 @@ async function onRequestNotifications() {
 }
 
 async function persistData(message) {
-	periodData.version = 2;
+	periodData.version = 3;
 	let result = await DataManager.saveData(JSON.stringify(periodData),undefined,currentKeyText);
 	if (!result) { warn("Saving data failed. Please try again."); return false; }
 	renderMedications();

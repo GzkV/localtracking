@@ -4,6 +4,7 @@
 set -eu
 
 mkdir -p web/assets
+mkdir -p web/assets/misc-tracking
 cp assets-src/wolf/howling-wolf-app-icon.png web/icons/
 pack='assets-src/werewolf/item-pack'
 icons='assets-src/werewolf/icons'
@@ -35,7 +36,10 @@ cp "$pack/chevron-left-icon-dark.png" web/assets/
 cp "$pack/chevron-right-icon-slate.png" web/assets/
 cp "$pack/eclipse-ring-icon-icy.png" web/assets/
 cp "$pack/wolf-avatar-howling-moon.png" web/assets/
+cp "$icons/wolf-icon-charcoal-front.png" web/assets/
 cp "$icons/wolf-icon-lavender-front.png" web/assets/
+cp "$icons/wolf-icon-silver-front.png" web/assets/
+cp "$icons/wolf-icon-teal-front.png" web/assets/
 cp "$motifs/wolf-moon-medallion-motif-ornate.png" web/assets/
 cp "$motifs/crescent-star-corner-motif-gold-upper-left.png" web/assets/
 cp "$gold/home-button-gold.png" web/assets/
@@ -45,5 +49,13 @@ cp "$gold/chevron-double-right-gold.png" web/assets/
 cp "$gold/paw-print-button-gold.png" web/assets/
 cp "$gold/panel-texture-center-gold.png" web/assets/
 cp "$gold/wolf-banner-gold.png" web/assets/
+
+# Copy tracker artwork only where a matching source asset exists. The served
+# tracker sprites remain checked-in assets because no source equivalents exist.
+cp "$pack/lightning-icon-cyan-alt.png" web/assets/misc-tracking/
+cp "$pack/paw-print-motif-cyan.png" web/assets/misc-tracking/
+cp "$pack/paw-print-motif-gold.png" web/assets/misc-tracking/
+cp "$pack/wolf-avatar-amber-eyes.png" web/assets/misc-tracking/
+cp "$pack/wolf-avatar-gray-snarl.png" web/assets/misc-tracking/
 
 echo 'Copied selected Moon.Time UI assets into web/assets/'
