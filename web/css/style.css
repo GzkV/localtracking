@@ -136,6 +136,7 @@ img {
 	border-color: rgba(var(--color-cyan), 0.5);
 	background-color: rgba(var(--color-night-3), 0.6);
 }
+.gold-nav-link { color: rgb(var(--color-gold)); }
 .nav-icon {
 	width: 1.5em;
 	height: 1.5em;
@@ -176,6 +177,12 @@ main {
 	border: 1px solid rgba(var(--color-slate), 0.45);
 	border-radius: 0.8em;
 	box-shadow: 0 0.4em 1.2em rgba(var(--color-night-0), 0.6);
+}
+.gold-panel {
+	background:
+		linear-gradient(180deg, rgba(var(--color-night-2), 0.88), rgba(var(--color-night-1), 0.95)),
+		url("/assets/panel-texture-center-gold.png") center / 100% 100% repeat;
+	border-color: rgba(var(--color-gold), 0.72);
 }
 .today-card {
 	background:
@@ -359,6 +366,12 @@ button:disabled {
 	border: 2px solid rgba(var(--color-gold), 0.7);
 	box-shadow: 0 0 0.8em rgba(var(--color-gold), 0.25);
 }
+.profile-gem {
+	width: 1.7em;
+	height: 1.7em;
+	margin-left: auto;
+	filter: drop-shadow(0 0 0.45em rgba(var(--color-gold), 0.7));
+}
 #profile-label { color: rgb(var(--color-icy)); }
 
 .chip-toggle {
@@ -455,7 +468,7 @@ button:disabled {
 	border-radius: 0;
 	background: rgba(var(--color-night-0), 0.72);
 }
-.dose-rune img { grid-row: 1 / span 2; width: 1.7em; height: 1.7em; }
+.dose-rune img { grid-row: 1 / span 2; width: 1.7em; height: 1.7em; object-fit: contain; }
 .dose-rune small { color: rgb(var(--color-text-dim)); }
 .dose-rune.is-taken { border-color: rgba(var(--color-cyan), 0.75); opacity: 0.7; }
 .paw-action::before { content: "🐾 "; font-family: sans-serif; }
@@ -510,6 +523,13 @@ footer {
 	border-radius: 0.8em;
 	margin-bottom: 1.2em;
 	image-rendering: pixelated;
+}
+.gold-banner {
+	object-fit: contain;
+	object-position: center;
+	background: rgba(var(--color-night-0), 0.7);
+	padding: 0.4em;
+	box-sizing: border-box;
 }
 main h2, main h3, main h4 {
 	color: rgb(var(--color-icy));

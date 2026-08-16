@@ -664,7 +664,7 @@ function renderTodayMedicationLog() {
 		button.dataset.action = "taken";
 		button.dataset.id = medication.id;
 		button.disabled = taken;
-		button.innerHTML = `<img src="/assets/calendar-paw-icon.png" alt=""> <span>${medication.name}</span><small>${taken ? "logged" : medication.dose}</small>`;
+		button.innerHTML = `<img src="/assets/paw-print-button-gold.png" alt=""> <span>${medication.name}</span><small>${taken ? "logged" : medication.dose}</small>`;
 		button.querySelector("img").addEventListener("error",evt => { evt.currentTarget.replaceWith(document.createTextNode("🐾")); },{ once: true, });
 		button.setAttribute("aria-label",`${medication.name}: ${taken ? "dose logged today" : "mark dose taken today"}`);
 		logEl.appendChild(button);

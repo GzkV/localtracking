@@ -1,4 +1,4 @@
-const CACHE_NAME = "moon-time-shell-v6";
+const CACHE_NAME = "moon-time-shell-v7";
 const APP_SHELL = [
   "/", "/index.html", "/about.html", "/privacy.html", "/manifest.webmanifest",
   "/css/style.css", "/js/main.js", "/js/browser-support.js", "/js/data-manager.js",
@@ -18,7 +18,11 @@ const APP_SHELL = [
 	  "/assets/blood-drop-icon-pink-pale.png", "/assets/blood-drop-icon-purple-dark.png", "/assets/blood-drop-icon-cyan-pink.png",
 	  "/assets/potion-drop-icon-peach-lavender.png", "/assets/potion-drop-icon-peach-purple.png",
 	  "/assets/chevron-left-icon-dark.png", "/assets/chevron-right-icon-slate.png", "/assets/eclipse-ring-icon-icy.png",
-	  "/assets/calendar-paw-icon.png"
+	  "/assets/calendar-paw-icon.png",
+	  "/assets/home-button-gold.png", "/assets/diamond-gem-gold.png",
+	  "/assets/chevron-double-left-gold.png", "/assets/chevron-double-right-gold.png",
+	  "/assets/paw-print-button-gold.png", "/assets/panel-texture-center-gold.png",
+	  "/assets/wolf-banner-gold.png"
 ];
 self.addEventListener("install", event => event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)).then(() => self.skipWaiting())));
 self.addEventListener("activate", event => event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key)))).then(() => self.clients.claim())));

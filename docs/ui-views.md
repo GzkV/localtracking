@@ -39,7 +39,7 @@ Art assets live in [`assets-src/werewolf/item-pack/`](../assets-src/werewolf/ite
 
 **Relevant code/assets:**
 - [`web/index.html`](../web/index.html) (`#saved-data`, `#prediction`, `#period-list`), [`web/js/main.js`](../web/js/main.js), [`web/js/data-manager.js`](../web/js/data-manager.js), [`web/js/period-prediction.js`](../web/js/period-prediction.js).
-- Icons: `home-icon-cyan.png` / `home-icon-teal.png` (nav), `blood-drop-icon-pink-pale.png` (period log), `calendar-paw-icon.png` (medication dose), `moon-phase-icon-cyan-glow.png` (prediction card).
+- Icons: `home-button-gold.png` (home nav), `blood-drop-icon-pink-pale.png` (period log), `paw-print-button-gold.png` (medication dose), and `moon-phase-icon-cyan-glow.png` (prediction card). Gold panel texture and the diamond gem are used for the dashboard profile chrome.
 
 ---
 
@@ -199,7 +199,7 @@ Art assets live in [`assets-src/werewolf/item-pack/`](../assets-src/werewolf/ite
 
 **Navigation:** global footer/header links; reachable without unlocking a profile.
 
-**Code/assets:** [`web/about.html`](../web/about.html), [`web/privacy.html`](../web/privacy.html); branding `wolf-icon-lavender-front.png`, `moonlit-wolf-banner-sprite.png`.
+**Code/assets:** [`web/about.html`](../web/about.html), [`web/privacy.html`](../web/privacy.html); branding `wolf-icon-lavender-front.png`, `wolf-banner-gold.png`, and the existing moonlit banner treatment.
 
 ---
 

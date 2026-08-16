@@ -8,6 +8,7 @@ cp assets-src/wolf/howling-wolf-app-icon.png web/icons/
 pack='assets-src/werewolf/item-pack'
 icons='assets-src/werewolf/icons'
 motifs='assets-src/werewolf/motifs'
+gold='assets-src/wolf/item_pack_gold'
 
 cp "$pack/forest background.png" web/assets/
 cp "$pack/moonlit-sky-panel-background.png" web/assets/
@@ -37,5 +38,12 @@ cp "$pack/wolf-avatar-howling-moon.png" web/assets/
 cp "$icons/wolf-icon-lavender-front.png" web/assets/
 cp "$motifs/wolf-moon-medallion-motif-ornate.png" web/assets/
 cp "$motifs/crescent-star-corner-motif-gold-upper-left.png" web/assets/
+cp "$gold/home-button-gold.png" web/assets/
+cp "$gold/diamond-gem-gold.png" web/assets/
+cp "$gold/chevron-double-left-gold.png" web/assets/
+cp "$gold/chevron-double-right-gold.png" web/assets/
+cp "$gold/paw-print-button-gold.png" web/assets/
+cp "$gold/panel-texture-center-gold.png" web/assets/
+cp "$gold/wolf-banner-gold.png" web/assets/
 
 echo 'Copied selected Moon.Time UI assets into web/assets/'
