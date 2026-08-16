@@ -910,7 +910,23 @@ async function showSavedDataPage() {
 	submitBtn.disabled = false;
 	if (storageManagerPersistSupported()) {
 		let persisted = false;
-		try { persisted = await navigator.storage.persist(); } catch (err) {}
+		try {
+			let alreadyPersisted = typeof navigator.storage.persisted === "function"
+				? await navigator.storage.persisted()
+				: "unsupported";
+			console.info("[storage-persistence] checking browser storage policy", {
+				userAgent: navigator.userAgent,
+				platform: navigator.platform,
+				alreadyPersisted,
+			});
+			persisted = await navigator.storage.persist();
+			console.info("[storage-persistence] persist() result", { persisted });
+		} catch (err) {
+			console.warn("[storage-persistence] persist() rejected", {
+				name: err && err.name,
+				message: err && err.message,
+			});
+		}
 		let notice = document.getElementById("storage-persistence-notice");
 		if (!persisted) {
 			notice.innerText = "This browser has not granted persistent storage. Keep encrypted backups because local data may be cleared.";

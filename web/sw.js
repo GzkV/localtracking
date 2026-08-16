@@ -1,4 +1,4 @@
-const CACHE_NAME = "moon-time-shell-v9";
+const CACHE_NAME = "moon-time-shell-v10";
 const APP_SHELL = [
   "/", "/index.html", "/about.html", "/privacy.html", "/manifest.webmanifest",
   "/css/style.css", "/js/main.js", "/js/browser-support.js", "/js/data-manager.js",
@@ -7,6 +7,7 @@ const APP_SHELL = [
   "/js/external/base64-arraybuffer.umd.js", "/js/external/idb-keyval.js",
   "/js/passphrase/random-integer.js", "/js/passphrase/random-phrase.js", "/js/passphrase/wordlist.js",
   "/icons/howling-wolf-app-icon.png",
+  "/icons/howling-wolf-app-icon-192.png", "/icons/howling-wolf-app-icon-512.png",
   "/assets/forest background.png", "/assets/moonlit-sky-panel-background.png", "/assets/moonlit-wolf-banner-sprite.png",
   "/assets/wolf-moon-medallion-motif-ornate.png", "/assets/crescent-star-corner-motif-gold-upper-left.png",
   "/assets/crescent-star-motif-lavender.png", "/assets/sparkle-motif-icy.png",

@@ -14,9 +14,8 @@ for (const [, reference] of references) {
 	if (file && !fs.existsSync(path.join(root, file))) throw new Error(`Missing web asset: ${reference}`);
 }
 
-for (const icon of ["icons/app-icon-192.svg", "icons/app-icon-512.svg"]) {
-	const svg = fs.readFileSync(path.join(root, icon), "utf8");
-	if (!/<svg\b[^>]*\b(?:width|viewBox)=/.test(svg)) throw new Error(`Invalid icon: ${icon}`);
+for (const icon of ["icons/howling-wolf-app-icon-192.png", "icons/howling-wolf-app-icon-512.png"]) {
+ if (!fs.existsSync(path.join(root, icon))) throw new Error(`Missing manifest icon: ${icon}`);
 }
 
 console.log("Web asset references and manifest icons are valid.");
