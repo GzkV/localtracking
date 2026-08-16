@@ -6,7 +6,7 @@ const APP_SHELL = [
   "/js/external/argon2.umd.min.js", "/js/external/idb-keyval.umd.js",
   "/js/external/base64-arraybuffer.umd.js", "/js/external/idb-keyval.js",
   "/js/passphrase/random-integer.js", "/js/passphrase/random-phrase.js", "/js/passphrase/wordlist.js",
-  "/icons/app-icon.svg", "/icons/app-icon-192.svg", "/icons/app-icon-512.svg",
+  "/icons/howling-wolf-app-icon.png",
   "/assets/forest background.png", "/assets/moonlit-sky-panel-background.png", "/assets/moonlit-wolf-banner-sprite.png",
   "/assets/wolf-moon-medallion-motif-ornate.png", "/assets/crescent-star-corner-motif-gold-upper-left.png",
   "/assets/crescent-star-motif-lavender.png", "/assets/sparkle-motif-icy.png",

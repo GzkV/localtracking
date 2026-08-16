@@ -4,6 +4,7 @@
 set -eu
 
 mkdir -p web/assets
+cp assets-src/wolf/howling-wolf-app-icon.png web/icons/
 pack='assets-src/werewolf/item-pack'
 icons='assets-src/werewolf/icons'
 motifs='assets-src/werewolf/motifs'
