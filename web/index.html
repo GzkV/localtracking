@@ -6,7 +6,7 @@
 
 <meta name="viewport" content="width=device-width">
 <meta name="robots" content="index, follow">
-<meta name="theme-color" content="#000000">
+<meta name="theme-color" content="#0b1026">
 <meta name="author" content="Anonymous">
 <meta itemprop="name" content="Moon.Time">
 <meta itemprop="description" content="Moon.Time -- The privacy-first period-tracking app">
@@ -40,31 +40,37 @@ if (document.documentElement && document.documentElement.style && document.docum
 </head>
 <body>
 
-<header>
+<header class="site-header">
+	<img class="corner-motif corner-motif-left" src="/assets/crescent-star-corner-motif-gold-upper-left.png" alt="" aria-hidden="true">
+	<img class="corner-motif corner-motif-right" src="/assets/crescent-star-corner-motif-gold-upper-left.png" alt="" aria-hidden="true">
 
-<h1 id="logo">Moon.Time</h1>
+	<h1 id="logo">
+		<img class="logo-wolf" src="/assets/wolf-icon-lavender-front.png" alt="" aria-hidden="true">
+		Moon<span class="bold-period">.</span>Time
+	</h1>
 
-<nav>
-    <ul>
-        <li><a href="/">Home</a></li>
-        <li><a href="about.html">About</a></li>
-				<li><a href="privacy.html">Privacy</a></li>
-    </ul>
-</nav>
-
+	<nav class="site-nav" aria-label="Main">
+		<ul>
+			<li><a href="/"><img class="nav-icon" src="/assets/home-icon-cyan.png" alt="" aria-hidden="true">Home</a></li>
+			<li><a href="about.html"><img class="nav-icon" src="/assets/moon-icon-crescent-left-bright.png" alt="" aria-hidden="true">About</a></li>
+			<li><a href="privacy.html"><img class="nav-icon" src="/assets/eclipse-ring-icon-icy.png" alt="" aria-hidden="true">Privacy</a></li>
+		</ul>
+	</nav>
 </header>
 
 <main>
 
-<h2>The privacy-first period-tracking app</h2>
+<section class="hero-panel">
+	<h2>The privacy-first period-tracking app</h2>
+	<p class="privacy-note">Your entries stay on this device and are encrypted before storage. Predictions are estimates only—not contraception or medical advice.</p>
+</section>
 
-<hr>
-
-<p class="privacy-note">Your entries stay on this device and are encrypted before storage. Predictions are estimates only—not contraception or medical advice.</p>
-
-<hr>
-
-<form id="create-profile" class="hidden" inert>
+<form id="create-profile" class="hidden view-card" inert>
+	<div class="view-card-header">
+		<img class="view-icon" src="/assets/user-icon-teal.png" alt="" aria-hidden="true">
+		<h3>Create Your Local Profile</h3>
+		<img class="view-motif" src="/assets/crescent-star-motif-lavender.png" alt="" aria-hidden="true">
+	</div>
 	<p>
 		<label for="register-profile-name">Name/describe your local profile with any text you will recognize:</label>
 	</p>
@@ -75,25 +81,34 @@ if (document.documentElement && document.documentElement.style && document.docum
 		<label for="register-password">To protect your information on this device, please choose a secret phrase (several words together that uniquely you will remember), separated by spaces, hyphens, punctuation, numbers, etc:</label>
 	</p>
 	<p>
-<input type="password" id="register-password" size="30" placeholder="set secret phrase" autocomplete="new-password">
+		<input type="password" id="register-password" size="30" placeholder="set secret phrase" autocomplete="new-password">
 	</p>
 	<p>
-<input type="password" id="register-password-confirm" size="30" placeholder="confirm secret phrase" autocomplete="new-password">
+		<input type="password" id="register-password-confirm" size="30" placeholder="confirm secret phrase" autocomplete="new-password">
 	</p>
 	<p>
-		<button type="submit" disabled>Create Local Profile</button>
+		<button type="submit" class="btn-primary" disabled>Create Local Profile</button>
 	</p>
+	<p class="privacy-note">No account is created on any server. Your profile lives only in this browser, encrypted with your secret phrase.</p>
 </form>
 
-<form id="restore-backup" class="hidden" inert>
+<form id="restore-backup" class="hidden view-card" inert>
+	<div class="view-card-header">
+		<img class="view-icon" src="/assets/undo-icon-left.png" alt="" aria-hidden="true">
+		<h3>Restore Backup</h3>
+	</div>
 	<p><label for="backup-file">Restore encrypted backup:</label> <input type="file" id="backup-file" accept="application/json,.json"></p>
 	<p><label for="backup-password">Backup passphrase:</label> <input type="password" id="backup-password" autocomplete="phrase"></p>
 	<p><label for="backup-profile-name">New profile name (leave blank to restore into the selected profile, or use the backup name):</label> <input type="text" id="backup-profile-name" maxlength="100"></p>
-	<p><button type="submit">Restore Backup</button></p>
+	<p><button type="submit" class="btn-primary">Restore Backup</button></p>
 	<p class="privacy-note">Your passphrase is not included in backups. Losing it means losing access to the encrypted data. Keep this backup and passphrase in safe places.</p>
 </form>
 
-<form id="generate-passphrase-suggestion" class="hidden">
+<form id="generate-passphrase-suggestion" class="hidden view-card">
+	<div class="view-card-header">
+		<img class="view-icon" src="/assets/sparkle-motif-icy.png" alt="" aria-hidden="true">
+		<h3>Passphrase Generator</h3>
+	</div>
 	<p>
 		<label for="generate-passphrase">Generate a secure passphrase.</label>
 	</p>
@@ -105,11 +120,15 @@ if (document.documentElement && document.documentElement.style && document.docum
 		<input id="generate-passphrase" type="text" size="30" placeholder="generate passphrase" autocomplete="phrase">
 	</p>
 	<p>
-		<button type="submit">Generate passphrase</button>
+		<button type="submit" class="btn-secondary">Generate passphrase</button>
 	</p>
 </form>
 
-<form id="login" class="hidden" inert>
+<form id="login" class="hidden view-card" inert>
+	<div class="view-card-header">
+		<img class="view-icon" src="/assets/moon-icon-crescent-left-bright.png" alt="" aria-hidden="true">
+		<h3>Unlock Your Profile</h3>
+	</div>
 	<p>
 		Local Profile: <select id="profile-names"></select>
 	</p>
@@ -118,40 +137,95 @@ if (document.documentElement && document.documentElement.style && document.docum
 		<input type="password" id="login-password" size="30" placeholder="your secret phrase" autocomplete="phrase">
 	</p>
 	<p>
-		<button type="submit" disabled>Login Locally</button>
+		<button type="submit" class="btn-primary" disabled>Login Locally</button>
 	</p>
-	<hr>
+	<hr class="moon-divider">
 	<p>
-		<button type="button" id="create-another-profile-btn" disabled>Create Another Local Profile</button>
+		<button type="button" id="create-another-profile-btn" class="btn-secondary" disabled>Create Another Local Profile</button>
 	</p>
 </form>
 
 <form id="saved-data" class="hidden" inert>
-	<p>
-		<button type="button" id="logout-btn">Logout</button>
-		<button type="button" id="change-passphrase-btn">Change Passphrase</button>
-		<button type="button" id="export-backup-btn">Download Encrypted Backup</button>
-	</p>
-	<p id="storage-persistence-notice" class="privacy-note hidden" role="status"></p>
-	<p class="privacy-note">Keep encrypted backups. Your passphrase is not recoverable; if you lose it, your data is lost.</p>
-	<p>
-		Profile: <strong><span id="profile-label"></span></strong>
-		<button type="button" id="delete-profile-btn">Delete Local Profile</button>
-	</p>
-	<section id="prediction" aria-live="polite">
-		<h3>Next period estimate</h3>
+
+	<nav class="app-nav" aria-label="App sections">
+		<ul>
+			<li><a href="#dashboard-section"><img class="nav-icon" src="/assets/home-icon-cyan.png" alt="" aria-hidden="true">Home</a></li>
+			<li><a href="#calendar-view"><img class="nav-icon" src="/assets/calendar-wolf-moon-icon.png" alt="" aria-hidden="true">Calendar</a></li>
+			<li><a href="#prediction"><img class="nav-icon" src="/assets/trend-up-icon-cyan.png" alt="" aria-hidden="true">Trends</a></li>
+			<li><a href="#medications"><img class="nav-icon" src="/assets/potion-drop-icon-peach-lavender.png" alt="" aria-hidden="true">Medications</a></li>
+			<li><a href="#reminders-section"><img class="nav-icon" src="/assets/bell-icon-gold.png" alt="" aria-hidden="true">Reminders</a></li>
+			<li><a href="#settings-section"><img class="nav-icon" src="/assets/settings-gear-icon-cyan.png" alt="" aria-hidden="true">Settings</a></li>
+		</ul>
+	</nav>
+
+	<section id="dashboard-section" class="view-card profile-bar">
+		<img class="profile-avatar" src="/assets/wolf-avatar-howling-moon.png" alt="" aria-hidden="true">
+		<p>
+			Profile: <strong><span id="profile-label"></span></strong>
+		</p>
+	</section>
+
+	<section class="view-card today-card">
+		<div class="view-card-header">
+			<img class="view-icon" src="/assets/blood-drop-icon-pink-pale.png" alt="" aria-hidden="true">
+			<h3>Today — Quick Log</h3>
+		</div>
+		<p><label for="period-start">Period start date:</label> <input type="date" id="period-start" required></p>
+		<p><label for="period-end">Period end date (optional):</label> <input type="date" id="period-end"></p>
+		<p><label class="chip-toggle"><input type="checkbox" id="period-exceptional"> Mark as an exceptional cycle</label></p>
+		<p>
+			<button type="submit" class="btn-primary" disabled>Save period</button>
+		</p>
+	</section>
+
+	<section id="prediction" class="view-card prediction-card" aria-live="polite">
+		<div class="view-card-header">
+			<img class="view-icon" src="/assets/moon-phase-icon-cyan-glow.png" alt="" aria-hidden="true">
+			<h3>Next period estimate</h3>
+		</div>
 		<p id="prediction-result">Record at least two period starts to see an estimate.</p>
 	</section>
-	<p><label for="period-start">Period start date:</label> <input type="date" id="period-start" required></p>
-	<p><label for="period-end">Period end date (optional):</label> <input type="date" id="period-end"></p>
-	<p><label><input type="checkbox" id="period-exceptional"> Mark as an exceptional cycle</label></p>
-	<p>
-		<button type="submit" disabled>Save period</button>
-	</p>
-	<ul id="period-list"></ul>
-	<hr>
-	<section id="medications" aria-live="polite">
-		<h3>Medications</h3>
+
+	<section class="view-card history-card">
+		<div class="view-card-header">
+			<img class="view-icon" src="/assets/calendar-check-icon-cyan.png" alt="" aria-hidden="true">
+			<h3>Recent History</h3>
+		</div>
+		<ul id="period-list"></ul>
+	</section>
+
+	<section id="calendar-view" class="view-card calendar-card">
+		<div class="view-card-header">
+			<img class="view-icon" src="/assets/calendar-wolf-moon-icon.png" alt="" aria-hidden="true">
+			<h3>Cycle Calendar</h3>
+		</div>
+		<div class="calendar-controls">
+			<button type="button" class="btn-icon" data-calendar="prev" aria-label="Previous month"><img src="/assets/chevron-left-icon-dark.png" alt="" aria-hidden="true"></button>
+			<span class="calendar-month-label" data-calendar="label">This month</span>
+			<button type="button" class="btn-icon" data-calendar="next" aria-label="Next month"><img src="/assets/chevron-right-icon-slate.png" alt="" aria-hidden="true"></button>
+		</div>
+		<div class="calendar-grid" data-calendar="grid" role="grid" aria-label="Cycle calendar">
+			<span class="calendar-weekday">Mo</span><span class="calendar-weekday">Tu</span><span class="calendar-weekday">We</span><span class="calendar-weekday">Th</span><span class="calendar-weekday">Fr</span><span class="calendar-weekday">Sa</span><span class="calendar-weekday">Su</span>
+			<span class="calendar-day" data-day="1">1</span><span class="calendar-day" data-day="2">2</span><span class="calendar-day" data-day="3">3</span><span class="calendar-day" data-day="4">4</span><span class="calendar-day" data-day="5">5</span><span class="calendar-day" data-day="6">6</span><span class="calendar-day" data-day="7">7</span>
+			<span class="calendar-day" data-day="8">8</span><span class="calendar-day" data-day="9">9</span><span class="calendar-day" data-day="10">10</span><span class="calendar-day" data-day="11">11</span><span class="calendar-day" data-day="12">12</span><span class="calendar-day" data-day="13">13</span><span class="calendar-day" data-day="14">14</span>
+			<span class="calendar-day" data-day="15">15</span><span class="calendar-day" data-day="16">16</span><span class="calendar-day" data-day="17">17</span><span class="calendar-day" data-day="18">18</span><span class="calendar-day" data-day="19">19</span><span class="calendar-day" data-day="20">20</span><span class="calendar-day" data-day="21">21</span>
+			<span class="calendar-day" data-day="22">22</span><span class="calendar-day" data-day="23">23</span><span class="calendar-day" data-day="24">24</span><span class="calendar-day" data-day="25">25</span><span class="calendar-day" data-day="26">26</span><span class="calendar-day" data-day="27">27</span><span class="calendar-day" data-day="28">28</span>
+			<span class="calendar-day" data-day="29">29</span><span class="calendar-day" data-day="30">30</span><span class="calendar-day" data-day="31">31</span>
+		</div>
+		<ul class="calendar-legend">
+			<li><img src="/assets/blood-drop-icon-cyan-pink.png" alt="" aria-hidden="true"> Period day</li>
+			<li><img src="/assets/moon-phase-icon-cyan-glow.png" alt="" aria-hidden="true"> Predicted window</li>
+			<li><img src="/assets/moon-icon-full-cyan.png" alt="" aria-hidden="true"> Est. ovulation</li>
+			<li><img src="/assets/potion-drop-icon-peach-purple.png" alt="" aria-hidden="true"> Medication dose</li>
+		</ul>
+		<p class="privacy-note">Predictions are estimates only — not contraception or medical advice. Confidence reflects how much consistent history is available.</p>
+	</section>
+
+	<section id="medications" class="view-card" aria-live="polite">
+		<div class="view-card-header">
+			<img class="view-icon" src="/assets/potion-drop-icon-peach-purple.png" alt="" aria-hidden="true">
+			<h3>Medications</h3>
+		</div>
 		<p id="medication-feedback" aria-live="polite"></p>
 		<div id="medication-editor">
 			<input type="hidden" id="medication-id">
@@ -161,17 +235,42 @@ if (document.documentElement && document.documentElement.style && document.docum
 			<p><label for="medication-start">Start date:</label> <input type="date" id="medication-start"></p>
 			<p><label for="medication-end">End date (optional):</label> <input type="date" id="medication-end"></p>
 			<p><label for="medication-notes">Notes (optional):</label> <textarea id="medication-notes" maxlength="500"></textarea></p>
-			<p><button type="button" id="save-medication-btn">Save medication</button> <button type="button" id="cancel-medication-btn" class="hidden">Cancel edit</button></p>
+			<p><button type="button" id="save-medication-btn" class="btn-primary">Save medication</button> <button type="button" id="cancel-medication-btn" class="btn-secondary hidden">Cancel edit</button></p>
 		</div>
 		<ul id="medication-list"></ul>
-		<h3>Reminders</h3>
+	</section>
+
+	<section id="reminders-section" class="view-card">
+		<div class="view-card-header">
+			<img class="view-icon" src="/assets/bell-icon-gold.png" alt="" aria-hidden="true">
+			<h3>Reminders</h3>
+		</div>
 		<p><label for="period-reminder-days">Period reminder days before estimate (optional):</label> <input type="number" id="period-reminder-days" min="0" max="30"></p>
-		<p><button type="button" id="request-notification-btn">Enable notifications</button></p>
+		<p><button type="button" id="request-notification-btn" class="btn-secondary">Enable notifications</button></p>
 		<p id="reminder-feedback" aria-live="polite"></p>
+	</section>
+
+	<section id="settings-section" class="view-card">
+		<div class="view-card-header">
+			<img class="view-icon" src="/assets/settings-gear-icon-cyan.png" alt="" aria-hidden="true">
+			<h3>Settings</h3>
+		</div>
+		<p id="storage-persistence-notice" class="privacy-note hidden" role="status"></p>
+		<p class="privacy-note">Keep encrypted backups. Your passphrase is not recoverable; if you lose it, your data is lost.</p>
+		<p class="settings-actions">
+			<button type="button" id="logout-btn" class="btn-secondary">Logout</button>
+			<button type="button" id="change-passphrase-btn" class="btn-secondary">Change Passphrase</button>
+			<button type="button" id="export-backup-btn" class="btn-secondary">Download Encrypted Backup</button>
+			<button type="button" id="delete-profile-btn" class="btn-danger">Delete Local Profile</button>
+		</p>
 	</section>
 </form>
 
-<form id="change-secure-passphrase" class="hidden" inert>
+<form id="change-secure-passphrase" class="hidden view-card" inert>
+	<div class="view-card-header">
+		<img class="view-icon" src="/assets/eclipse-ring-icon-icy.png" alt="" aria-hidden="true">
+		<h3>Change Passphrase</h3>
+	</div>
 	<p>
 		<label for="change-old-password">Current secret passphrase:</label>
 	</p>
@@ -188,18 +287,22 @@ if (document.documentElement && document.documentElement.style && document.docum
 		<input type="password" id="change-password-confirm" size="30" placeholder="confirm secret phrase" autocomplete="phrase">
 	</p>
 	<p>
-		<button type="submit" disabled>Change Passphrase</button>
+		<button type="submit" class="btn-primary" disabled>Change Passphrase</button>
 	</p>
 </form>
 
 </main>
 
-<footer>&copy;2022 Moon.Time</footer>
+<footer>
+	<img class="footer-medallion" src="/assets/wolf-moon-medallion-motif-ornate.png" alt="" aria-hidden="true">
+	<p>&copy;2022 Moon.Time</p>
+</footer>
 
 <div id="notification-banner" class="hidden" role="dialog" aria-modal="true" aria-labelledby="notification-message">
 	<form>
+		<img class="banner-bell" src="/assets/bell-icon-cyan.png" alt="" aria-hidden="true">
 		<div id="notification-message" class="msg" aria-live="polite" aria-atomic="true"></div>
-<button type="button" class="cancel-btn hidden">Cancel</button>
+		<button type="button" class="cancel-btn hidden">Cancel</button>
 		<button type="submit">OK</button>
 	</form>
 </div>

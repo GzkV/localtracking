@@ -1,4 +1,4 @@
-const CACHE_NAME = "moon-time-shell-v5";
+const CACHE_NAME = "moon-time-shell-v6";
 const APP_SHELL = [
   "/", "/index.html", "/about.html", "/privacy.html", "/manifest.webmanifest",
   "/css/style.css", "/js/main.js", "/js/browser-support.js", "/js/data-manager.js",
@@ -6,7 +6,18 @@ const APP_SHELL = [
   "/js/external/argon2.umd.min.js", "/js/external/idb-keyval.umd.js",
   "/js/external/base64-arraybuffer.umd.js", "/js/external/idb-keyval.js",
   "/js/passphrase/random-integer.js", "/js/passphrase/random-phrase.js", "/js/passphrase/wordlist.js",
-  "/icons/app-icon.svg", "/icons/app-icon-192.svg", "/icons/app-icon-512.svg"
+  "/icons/app-icon.svg", "/icons/app-icon-192.svg", "/icons/app-icon-512.svg",
+  "/assets/forest background.png", "/assets/moonlit-sky-panel-background.png", "/assets/moonlit-wolf-banner-sprite.png",
+  "/assets/wolf-moon-medallion-motif-ornate.png", "/assets/crescent-star-corner-motif-gold-upper-left.png",
+  "/assets/crescent-star-motif-lavender.png", "/assets/sparkle-motif-icy.png",
+  "/assets/wolf-icon-lavender-front.png", "/assets/wolf-avatar-howling-moon.png",
+  "/assets/home-icon-cyan.png", "/assets/calendar-wolf-moon-icon.png", "/assets/calendar-check-icon-cyan.png",
+  "/assets/settings-gear-icon-cyan.png", "/assets/bell-icon-gold.png", "/assets/bell-icon-cyan.png",
+  "/assets/user-icon-teal.png", "/assets/trend-up-icon-cyan.png", "/assets/undo-icon-left.png",
+  "/assets/moon-phase-icon-cyan-glow.png", "/assets/moon-icon-crescent-left-bright.png", "/assets/moon-icon-full-cyan.png",
+  "/assets/blood-drop-icon-pink-pale.png", "/assets/blood-drop-icon-cyan-pink.png",
+  "/assets/potion-drop-icon-peach-lavender.png", "/assets/potion-drop-icon-peach-purple.png",
+  "/assets/chevron-left-icon-dark.png", "/assets/chevron-right-icon-slate.png", "/assets/eclipse-ring-icon-icy.png"
 ];
 self.addEventListener("install", event => event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)).then(() => self.skipWaiting())));
 self.addEventListener("activate", event => event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key)))).then(() => self.clients.claim())));
