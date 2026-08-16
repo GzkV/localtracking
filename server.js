@@ -138,8 +138,10 @@ async function onRequest(req,res) {
 					},req,res);
 				}
 				catch (err) {
-					res.writeHead(404);
-					res.end();
+					if (!res.headersSent && !res.writableEnded) {
+						res.writeHead(404);
+						res.end();
+					}
 				}
 				return;
 			}
@@ -173,6 +175,10 @@ async function onRequest(req,res) {
 		// handle all other static files
 		staticServer.serve(req,res,async function onStaticComplete(err){
 			if (err) {
+				// Avoid sending a second response if the static server already
+				// started or completed one before reporting the error.
+				if (res.headersSent || res.writableEnded) return;
+
 				var acceptsHtml = /(?:^|,)\s*text\/html(?:\s*;[^,]*)?(?:,|$)/i.test(req.headers.accept || "");
 				var isNavigation = req.headers["sec-fetch-mode"] === "navigate" ||
 					(req.headers["sec-fetch-dest"] === "document" && acceptsHtml);
@@ -185,13 +191,17 @@ async function onRequest(req,res) {
 				catch (err2) {}
 			}
 
-			res.writeHead(404);
-			res.end();
+			if (!res.headersSent && !res.writableEnded) {
+				res.writeHead(404);
+				res.end();
+			}
 		});
 	}
 	else {
-		res.writeHead(404);
-		res.end();
+		if (!res.headersSent && !res.writableEnded) {
+			res.writeHead(404);
+			res.end();
+		}
 	}
 }
 
