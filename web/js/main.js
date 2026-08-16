@@ -122,6 +122,7 @@ async function main() {
 		document.getElementById("log-trackers-btn").addEventListener("click",onLogTrackers,false);
 		document.getElementById("tracker-log-date").addEventListener("change",renderTodayTrackerLog,false);
 		document.getElementById("period-reminder-days").addEventListener("change",onReminderSettingsChange,false);
+		document.querySelectorAll('input[name="settings-profile-icon"]').forEach(input => input.addEventListener("change",onProfileIconChange,false));
 		document.getElementById("request-notification-btn").addEventListener("click",onRequestNotifications,false);
 		document.querySelector('[data-calendar="prev"]').addEventListener("click",() => changeCalendarMonth(-1),false);
 		document.querySelector('[data-calendar="next"]').addEventListener("click",() => changeCalendarMonth(1),false);
@@ -256,6 +257,26 @@ function normalizeProfileIcon(profileIcon) {
 	return PROFILE_ICONS.has(profileIcon) ? profileIcon : DEFAULT_PROFILE_ICON;
 }
 
+async function onProfileIconChange(evt) {
+	let selectedIcon = evt.target.value;
+	if (!PROFILE_ICONS.has(selectedIcon)) return;
+	let accountID = sessionStorage.getItem("current-account-id");
+	let accounts = await getAccounts();
+	let account = accounts[accountID];
+	if (!account) return;
+	let previousIcon = normalizeProfileIcon(account.profileIcon);
+	account.profileIcon = selectedIcon;
+	try {
+		await idbKeyval.set("accounts",accounts);
+		profileAvatarEl.src = selectedIcon;
+		document.getElementById("profile-icon-feedback").innerText = "Profile icon saved.";
+	}
+	catch (err) {
+		for (let input of document.querySelectorAll('input[name="settings-profile-icon"]')) input.checked = input.value === previousIcon;
+		document.getElementById("profile-icon-feedback").innerText = "Profile icon could not be saved.";
+	}
+}
+
 function normalizeTracker(tracker) {
 	return {
 		id: String(tracker.id || crypto.randomUUID()), name: String(tracker.name || "Tracker").slice(0,100),
@@ -271,7 +292,9 @@ async function populateSavedData() {
 		let accountID = sessionStorage.getItem("current-account-id");
 		let account = accounts[accountID];
 		profileLabelEl.innerText = account.profileName;
-		profileAvatarEl.src = normalizeProfileIcon(account.profileIcon);
+		let profileIcon = normalizeProfileIcon(account.profileIcon);
+		profileAvatarEl.src = profileIcon;
+		for (let input of document.querySelectorAll('input[name="settings-profile-icon"]')) input.checked = input.value === profileIcon;
 	}
 
 	let data = await DataManager.getData(undefined,currentKeyText);

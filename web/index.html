@@ -325,6 +325,16 @@ window.addEventListener("unhandledrejection",evt => {
 			<img class="view-icon" src="/assets/settings-gear-icon-cyan.png" alt="" aria-hidden="true">
 			<h3>Settings</h3>
 		</div>
+		<fieldset class="profile-icon-picker">
+			<legend>Profile icon</legend>
+			<div class="profile-icon-options" role="radiogroup" aria-label="Choose your profile icon">
+				<label class="profile-icon-option"><input type="radio" name="settings-profile-icon" value="/assets/wolf-icon-charcoal-front.png" aria-label="Charcoal wolf"><img src="/assets/wolf-icon-charcoal-front.png" alt="Charcoal wolf"><span>Charcoal</span></label>
+				<label class="profile-icon-option"><input type="radio" name="settings-profile-icon" value="/assets/wolf-icon-lavender-front.png" aria-label="Lavender wolf"><img src="/assets/wolf-icon-lavender-front.png" alt="Lavender wolf"><span>Lavender</span></label>
+				<label class="profile-icon-option"><input type="radio" name="settings-profile-icon" value="/assets/wolf-icon-silver-front.png" aria-label="Silver wolf"><img src="/assets/wolf-icon-silver-front.png" alt="Silver wolf"><span>Silver</span></label>
+				<label class="profile-icon-option"><input type="radio" name="settings-profile-icon" value="/assets/wolf-icon-teal-front.png" aria-label="Teal wolf"><img src="/assets/wolf-icon-teal-front.png" alt="Teal wolf"><span>Teal</span></label>
+			</div>
+		</fieldset>
+		<p id="profile-icon-feedback" class="privacy-note" aria-live="polite"></p>
 		<p id="storage-persistence-notice" class="privacy-note hidden" role="status"></p>
 		<p class="privacy-note">Keep encrypted backups. Your passphrase is not recoverable; if you lose it, your data is lost.</p>
 		<p class="settings-actions">

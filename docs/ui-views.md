@@ -152,14 +152,15 @@ Encrypted data uses `trackers` records shaped as `{ id, name, icon, notes, entri
 **Purpose:** Account/security and app preferences.
 
 **Key components:**
+- Profile: Profile icon picker (`input[name="settings-profile-icon"]`) for changing the dashboard wolf icon after profile creation.
 - Security: Change Passphrase form (`#change-secure-passphrase`), Logout (`#logout-btn`), Delete Local Profile (`#delete-profile-btn`).
 - Backup: Download Encrypted Backup (`#export-backup-btn`), link to Restore Backup.
 - Notifications: enable button (`#request-notification-btn`), period reminder days input (`#period-reminder-days`, 0–30), reminder feedback (`#reminder-feedback`).
 - Storage persistence notice (`#storage-persistence-notice`).
 
-**Interactions:** change passphrase (re-keys encrypted data via `auth-worker`); export/import JSON backups; request Notification permission and schedule reminders via [`web/js/notification-manager.js`](../web/js/notification-manager.js); destructive actions require confirmation.
+**Interactions:** choose a wolf icon to update account metadata and the dashboard avatar immediately; change passphrase (re-keys encrypted data via `auth-worker`); export/import JSON backups; request Notification permission and schedule reminders via [`web/js/notification-manager.js`](../web/js/notification-manager.js); destructive actions require confirmation.
 
-**Data:** captures reminder preferences and passphrase changes; displays profile label and storage status.
+**Data:** captures the validated `profileIcon` account metadata value, reminder preferences, and passphrase changes; displays profile label, avatar, and storage status.
 
 **Navigation:** from Dashboard nav; → Restore Backup, About, Privacy.
 
