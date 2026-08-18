@@ -16,11 +16,10 @@ Art assets live in [`assets-src/werewolf/item-pack/`](../assets-src/werewolf/ite
 
 **Key UI components:**
 - Header with app logo and profile label (existing `#logo`, `#profile-label`).
-- Dedicated daily logging card (`#logging-section`) with one shared logging date:
-  - Period toggle: "Period started today" / "Period ended today" (maps to existing `#period-start` / `#period-end` date inputs, defaulting to today).
-  - Symptom checklist/chips (flow intensity, cramps, mood, headache, fatigue, etc.).
-  - Medication dose checklist: medications active on the selected date with paw-print "taken" buttons (data from the existing `#medication-list` model).
-  - Miscellaneous tracker multi-select and shared note for the selected date.
+- Dedicated daily logging card (`#logging-section`) with one shared logging date and a unified tracking-mode picker. The Period, Medication, and Personal tracker modes (`[data-tracking-mode]`) reveal only their relevant controls; the selected mode is exposed through `aria-pressed` and remains usable with keyboard focus.
+  - Period mode maps to the existing `#period-start` / `#period-end` date inputs and exceptional-cycle flag.
+  - Medication mode shows active medications for the selected date with paw-print "taken" buttons (data from the existing `#medication-list` model).
+  - Personal tracker mode provides multi-select and shared note logging for the selected date, with an empty state linking to tracker setup.
 - Next-period estimate card (existing `#prediction` / `#prediction-result` section, `aria-live="polite"`).
 - Recent history list: last ~7–14 days of entries (existing `#period-list`, extended with symptom/dose entries).
 - Privacy note banner (existing `.privacy-note` text).

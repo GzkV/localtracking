@@ -44,6 +44,7 @@ var pendingBackup;
 var periodData = { version: 2, cycles: [], medications: [], reminders: { medicationTimes: {}, periodDaysBefore: null, }, };
 var calendarMonth = new Date(new Date().getFullYear(),new Date().getMonth(),1);
 var selectedLoggingDate = dateKey(new Date());
+var trackingMode = "period";
 
 document.addEventListener("DOMContentLoaded",() => main().catch(err => {
 	console.error("[Moon.Time] startup failed; interactive controls may remain hidden/inert",err);
@@ -124,6 +125,7 @@ async function main() {
 		document.getElementById("log-trackers-btn").addEventListener("click",onLogTrackers,false);
 		document.getElementById("tracker-log-date").addEventListener("change",renderTodayTrackerLog,false);
 		document.getElementById("tracker-log-date").addEventListener("change",() => setLoggingDate(document.getElementById("tracker-log-date").value),false);
+		document.querySelectorAll("[data-tracking-mode]").forEach(button => button.addEventListener("click",() => setTrackingMode(button.dataset.trackingMode),false));
 		document.getElementById("period-reminder-days").addEventListener("change",onReminderSettingsChange,false);
 		document.querySelectorAll('input[name="settings-profile-icon"]').forEach(input => input.addEventListener("change",onProfileIconChange,false));
 		document.getElementById("request-notification-btn").addEventListener("click",onRequestNotifications,false);
@@ -335,6 +337,7 @@ async function populateSavedData() {
 	renderTrackerIcons();
 	renderTrackers();
 	renderTodayTrackerLog();
+	renderTrackingWorkspace();
 	calendarMonth = new Date(new Date().getFullYear(),new Date().getMonth(),1);
 	renderCalendar();
 	if (needsMigration) await DataManager.saveData(JSON.stringify(periodData),undefined,currentKeyText);
@@ -602,6 +605,27 @@ function setLoggingDate(value,rerender = true) {
 	return true;
 }
 
+function setTrackingMode(mode) {
+	if (!["period","medication","tracker"].includes(mode)) return;
+	trackingMode = mode;
+	renderTrackingWorkspace();
+}
+
+function renderTrackingWorkspace() {
+	for (let button of document.querySelectorAll("[data-tracking-mode]")) {
+		let selected = button.dataset.trackingMode === trackingMode;
+		button.classList.toggle("is-active",selected);
+		button.setAttribute("aria-pressed",String(selected));
+	}
+	for (let panel of document.querySelectorAll("[data-tracking-panel]")) {
+		let selected = panel.dataset.trackingPanel === trackingMode;
+		panel.classList.toggle("hidden",!selected);
+		panel.setAttribute("aria-hidden",String(!selected));
+	}
+	let emptyState = document.getElementById("tracking-empty-state");
+	if (emptyState) emptyState.classList.toggle("hidden",trackingMode !== "tracker" || periodData.trackers.length > 0);
+}
+
 function focusLoggingDate(date) {
 	if (!setLoggingDate(date)) return;
 	let logging = document.getElementById("logging-section");
@@ -792,7 +816,7 @@ function renderTrackers() {
 function renderTodayTrackerLog() {
 	let log = document.getElementById("today-tracker-log"); if (!log) return;
 	let dateInput = document.getElementById("tracker-log-date"); if (!dateInput.value) dateInput.value = dateKey(new Date()); log.innerHTML = "";
-	if (!periodData.trackers.length) { let empty = document.createElement("p"); empty.className = "empty-state"; empty.innerText = "Create a tracker below to add it to the quick log."; log.appendChild(empty); return; }
+	if (!periodData.trackers.length) { renderTrackingWorkspace(); return; }
 	console.info("[Moon.Time] tracker entry editor diagnostics",{
 		date: dateInput.value,
 		trackersWithEntryForDate: periodData.trackers.filter(tracker => (tracker.entries || []).some(entry => entry.date === dateInput.value)).map(tracker => ({
@@ -816,6 +840,7 @@ function renderTodayTrackerLog() {
 			log.appendChild(actions);
 		}
 	}
+	renderTrackingWorkspace();
 }
 
 async function onSaveTracker() {

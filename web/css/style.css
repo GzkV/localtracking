@@ -191,11 +191,23 @@ main {
 	border-color: rgba(var(--color-gold), 0.55);
 }
 .logging-intro { color: rgb(var(--color-text-dim)); }
+.workspace-kicker { margin: 0.15em 0 0; color: rgb(var(--color-text-dim)); font-size: 0.72em; letter-spacing: 0.04em; }
 .logging-date-row { display: flex; align-items: center; gap: 0.6em; margin: 1em 0; padding: 0.7em; border: 1px solid rgba(var(--color-gold), 0.45); border-radius: 0.6em; background: rgba(var(--color-night-0), 0.45); }
 .logging-panels { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.8em; }
 .logging-panel { min-width: 0; padding: 0.8em; border: 1px solid rgba(var(--color-slate), 0.5); border-radius: 0.6em; background: rgba(var(--color-night-0), 0.35); }
 .logging-panel h4 { margin-top: 0; }
 .logging-period-panel h4 { color: rgb(var(--color-pink)); }
+.tracking-mode-picker { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.6em; margin: 1em 0 0.8em; }
+.tracking-mode { display: grid; grid-template-columns: 2.2em 1fr; grid-template-rows: auto auto; align-items: center; gap: 0 0.45em; min-width: 0; padding: 0.65em; text-align: left; border-color: rgba(var(--color-slate), 0.6); background: rgba(var(--color-night-0), 0.55); }
+.tracking-mode img { grid-row: 1 / span 2; width: 1.9em; height: 1.9em; object-fit: contain; }
+.tracking-mode span { color: rgb(var(--color-text)); font-weight: bold; }
+.tracking-mode small { color: rgb(var(--color-text-dim)); font-size: 0.7em; }
+.tracking-mode.is-active { border-color: rgba(var(--color-cyan), 0.95); background: linear-gradient(180deg, rgba(35, 75, 100, 0.9), rgba(var(--color-night-3), 0.9)); box-shadow: 0 0 0.8em rgba(var(--color-cyan), 0.2); }
+.tracking-mode.is-active span { color: rgb(var(--color-icy)); }
+.tracking-workspace { min-height: 12em; }
+.tracking-workspace .logging-panel { margin: 0; }
+.workspace-empty { margin: 1em 0 0; }
+.workspace-empty a { color: rgb(var(--color-cyan)); }
 .view-card-header {
 	display: flex;
 	align-items: center;
@@ -676,4 +688,6 @@ main[inert], header[inert], footer[inert] {
 	.profile-icon-options { grid-template-columns: repeat(2, minmax(4em, 1fr)); }
 	.logging-panels { grid-template-columns: 1fr; }
 	.logging-date-row { align-items: flex-start; flex-direction: column; }
+	.tracking-mode-picker { grid-template-columns: 1fr; }
+	.tracking-mode { grid-template-columns: 2.4em 1fr; }
 }

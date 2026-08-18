@@ -207,31 +207,40 @@ window.addEventListener("unhandledrejection",evt => {
 	<section id="logging-section" class="view-card logging-card">
 		<div class="view-card-header">
 			<img class="view-icon" src="/assets/sprite-6-1.png" alt="" aria-hidden="true">
-			<h3>Daily Log</h3>
+			<div>
+				<h3>Daily tracker</h3>
+				<p class="workspace-kicker">Choose what you want to record</p>
+			</div>
 		</div>
-		<p class="logging-intro">Period, medication, and miscellaneous tracker entries for one date live together here. Management of medication and tracker definitions remains below.</p>
+		<p class="logging-intro">One focused workspace for period, medication, and personal tracker entries. Switch modes to keep the controls you need in view.</p>
 		<div class="logging-date-row"><label for="tracker-log-date">Logging date:</label> <input type="text" id="tracker-log-date" data-date-input inputmode="numeric" placeholder="YYYY-MM-DD" autocomplete="off"></div>
-		<div class="logging-panels">
-			<section class="logging-panel logging-period-panel">
+		<div class="tracking-mode-picker" role="group" aria-label="Choose what to track">
+			<button type="button" class="tracking-mode is-active" data-tracking-mode="period" aria-pressed="true"><img src="/assets/sprite-6-1.png" alt="" aria-hidden="true"><span>Period</span><small>Cycle dates</small></button>
+			<button type="button" class="tracking-mode" data-tracking-mode="medication" aria-pressed="false"><img src="/assets/sprite-8-6.png" alt="" aria-hidden="true"><span>Medication</span><small>Doses</small></button>
+			<button type="button" class="tracking-mode" data-tracking-mode="tracker" aria-pressed="false"><img src="/assets/misc-tracking/paw-print-motif-cyan.png" alt="" aria-hidden="true"><span>Personal tracker</span><small>Symptoms &amp; more</small></button>
+		</div>
+		<div class="tracking-workspace" aria-live="polite">
+			<section id="tracking-panel-period" class="logging-panel logging-period-panel" data-tracking-panel="period">
 				<h4>Period</h4>
 				<p><label for="period-start">Period start date:</label> <input type="text" id="period-start" data-date-input inputmode="numeric" placeholder="YYYY-MM-DD" autocomplete="off" required></p>
 				<p><label for="period-end">Period end date (optional):</label> <input type="text" id="period-end" data-date-input inputmode="numeric" placeholder="YYYY-MM-DD" autocomplete="off"></p>
 				<p><label class="chip-toggle"><input type="checkbox" id="period-exceptional"> Mark as an exceptional cycle</label></p>
 				<p><button type="submit" class="btn-primary" disabled>Save period</button></p>
 			</section>
-			<section class="logging-panel today-dose-log">
+			<section id="tracking-panel-medication" class="logging-panel today-dose-log hidden" data-tracking-panel="medication" aria-hidden="true">
 				<h4>Medication</h4>
 				<p class="privacy-note">Tap a dose to mark it taken on the logging date.</p>
 				<div id="today-medication-log" class="dose-grid"></div>
 			</section>
-			<section class="logging-panel today-tracker-log">
-				<h4>Miscellaneous trackers</h4>
+			<section id="tracking-panel-tracker" class="logging-panel today-tracker-log hidden" data-tracking-panel="tracker" aria-hidden="true">
+				<h4>Personal trackers</h4>
 				<p class="privacy-note">Select any combination and log them together for the logging date.</p>
 			<div id="today-tracker-log" class="tracker-checklist"></div>
 			<p><label for="tracker-log-note">Shared note (optional):</label> <textarea id="tracker-log-note" maxlength="500"></textarea></p>
 			<p><button type="button" id="log-trackers-btn" class="btn-primary">Log selected trackers</button></p>
 			</section>
 		</div>
+		<p class="workspace-empty empty-state hidden" id="tracking-empty-state">No personal trackers yet. Use <a href="#trackers">Tracker setup</a> below to add one, then return here to log it.</p>
 	</section>
 
 	<section id="prediction" class="view-card prediction-card" aria-live="polite">
@@ -306,7 +315,7 @@ window.addEventListener("unhandledrejection",evt => {
 	<section id="trackers" class="view-card" aria-live="polite">
 		<div class="view-card-header">
 			<img class="view-icon" src="/assets/misc-tracking/paw-print-motif-cyan.png" alt="" aria-hidden="true">
-			<h3>Track anything</h3>
+			<h3>Tracker setup</h3>
 		</div>
 		<p class="privacy-note">Create your own private trackers for migraines, intimacy, symptoms, or anything else. A tracker definition is separate from its daily log entries.</p>
 		<p id="tracker-feedback" aria-live="polite"></p>
