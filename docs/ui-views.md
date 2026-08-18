@@ -16,16 +16,17 @@ Art assets live in [`assets-src/werewolf/item-pack/`](../assets-src/werewolf/ite
 
 **Key UI components:**
 - Header with app logo and profile label (existing `#logo`, `#profile-label`).
-- "Today" quick-log card:
+- Dedicated daily logging card (`#logging-section`) with one shared logging date:
   - Period toggle: "Period started today" / "Period ended today" (maps to existing `#period-start` / `#period-end` date inputs, defaulting to today).
   - Symptom checklist/chips (flow intensity, cramps, mood, headache, fatigue, etc.).
-  - Medication dose checklist: today's scheduled medications with paw-print "taken" buttons (data from the existing `#medication-list` model).
+  - Medication dose checklist: medications active on the selected date with paw-print "taken" buttons (data from the existing `#medication-list` model).
+  - Miscellaneous tracker multi-select and shared note for the selected date.
 - Next-period estimate card (existing `#prediction` / `#prediction-result` section, `aria-live="polite"`).
 - Recent history list: last ~7–14 days of entries (existing `#period-list`, extended with symptom/dose entries).
 - Privacy note banner (existing `.privacy-note` text).
 
 **User interactions:**
-- One-tap logging of period start/end; tap a symptom chip to toggle; tap a medication to mark a dose taken.
+- Choose a shared logging date, save period dates, mark a medication dose taken for that date, or log selected trackers.
 - Tap a history item → Entry Detail/Edit view.
 - Tap prediction card → Calendar view for full cycle context.
 - Pull-to-refresh / re-render on data change (data flows through `data-manager` get/set).
@@ -51,7 +52,7 @@ Art assets live in [`assets-src/werewolf/item-pack/`](../assets-src/werewolf/ite
 - Month grid with prev/next month controls (icons: `chevron-left-icon-dark.png`, `chevron-right-icon-slate.png`).
 - Day cells with layered markers:
   - Period days (blood-drop marker, e.g. `blood-drop-icon-cyan-pink.png`).
-  - Predicted next period span (highlighted range using `predict()` output: `date`, `min`/`max` window, `confidence`) with a red projected-period teardrop marker.
+  - Full predicted cycle overlay (starting on `predict()`'s `date` and continuing for the adaptive `typical` cycle length), with a separate red projected-period teardrop marker for the estimated start range.
   - Fertile window estimate (derived from typical cycle length: ~14 days before predicted next period, ±2 days; moon-phase icons such as `moon-icon-full-cyan.png` for estimated ovulation).
   - Medication dose markers use paw prints on exact adherence dates.
 - Legend explaining markers and the confidence label ("low / moderate / higher" from `predict()`).
@@ -59,7 +60,7 @@ Art assets live in [`assets-src/werewolf/item-pack/`](../assets-src/werewolf/ite
 - Disclaimer: predictions are estimates, not contraception or medical advice (existing `.privacy-note` copy).
 
 **User interactions:**
-- Swipe/click to change month; tap a day to view or add an entry for that date; long-press/tap predicted day to see range and confidence.
+- Swipe/click to change month; activate a keyboard-accessible day to view its period, medication, and tracker entries, then jump to the consolidated logging card for that date.
 - Toggle layers (period / fertile window / medications).
 
 **Data displayed / inputs captured:**
@@ -217,7 +218,7 @@ Encrypted data uses `trackers` records shaped as `{ id, name, icon, notes, entri
 | # | View | Status | Primary code | Key assets |
 |---|------|--------|--------------|------------|
 | 1 | Dashboard / Home | Partial (in-page `#saved-data`) | `web/js/main.js`, `web/js/data-manager.js` | home, blood-drop, potion-drop icons |
-| 2 | Calendar | Not yet implemented | `web/js/period-prediction.js` | calendar, moon-phase, chevron icons |
+| 2 | Calendar | Implemented (`#calendar-view`) | `web/js/main.js`, `web/js/period-prediction.js` | calendar, moon-phase, chevron icons |
 | 3 | Onboarding / Create Profile | Implemented (`#create-profile`) | `web/js/auth-worker.js` | user icon, crescent-star motif |
 | 4 | Login / Unlock | Implemented (`#login`) | `web/js/auth-worker.js` | crescent moon icon |
 | 5 | Medication Management | Implemented (`#medications`) | `web/js/main.js` | potion-drop, gear icons |

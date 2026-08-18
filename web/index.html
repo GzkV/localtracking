@@ -187,6 +187,7 @@ window.addEventListener("unhandledrejection",evt => {
 		<ul>
 			<li><a href="#dashboard-section"><img class="nav-icon" src="/assets/home-icon-cyan.png" alt="" aria-hidden="true">Home</a></li>
 			<li><a href="#calendar-view"><img class="nav-icon" src="/assets/calendar-wolf-moon-icon.png" alt="" aria-hidden="true">Calendar</a></li>
+			<li><a href="#logging-section"><img class="nav-icon" src="/assets/sprite-6-1.png" alt="" aria-hidden="true">Log</a></li>
 			<li><a href="#prediction"><img class="nav-icon" src="/assets/trend-up-icon-cyan.png" alt="" aria-hidden="true">Trends</a></li>
 			<li><a href="#medications"><img class="nav-icon" src="/assets/sprite-8-6.png" alt="" aria-hidden="true">Medications</a></li>
 			<li><a href="#trackers"><img class="nav-icon" src="/assets/misc-tracking/paw-print-motif-cyan.png" alt="" aria-hidden="true">Trackers</a></li>
@@ -203,29 +204,33 @@ window.addEventListener("unhandledrejection",evt => {
 		</p>
 	</section>
 
-	<section class="view-card today-card">
+	<section id="logging-section" class="view-card logging-card">
 		<div class="view-card-header">
 			<img class="view-icon" src="/assets/sprite-6-1.png" alt="" aria-hidden="true">
-			<h3>Today — Quick Log</h3>
+			<h3>Daily Log</h3>
 		</div>
-		<p><label for="period-start">Period start date:</label> <input type="text" id="period-start" data-date-input inputmode="numeric" placeholder="YYYY-MM-DD" autocomplete="off" required></p>
-		<p><label for="period-end">Period end date (optional):</label> <input type="text" id="period-end" data-date-input inputmode="numeric" placeholder="YYYY-MM-DD" autocomplete="off"></p>
-		<p><label class="chip-toggle"><input type="checkbox" id="period-exceptional"> Mark as an exceptional cycle</label></p>
-		<p>
-			<button type="submit" class="btn-primary" disabled>Save period</button>
-		</p>
-		<div class="today-dose-log">
-			<h4>Medication runes</h4>
-			<p class="privacy-note">Tap a paw to mark a scheduled dose taken today.</p>
-			<div id="today-medication-log" class="dose-grid"></div>
-		</div>
-		<div class="today-tracker-log">
-			<h4>Other things to track</h4>
-			<p class="privacy-note">Select any combination and log them together for the chosen date.</p>
-			<p><label for="tracker-log-date">Log date:</label> <input type="text" id="tracker-log-date" data-date-input inputmode="numeric" placeholder="YYYY-MM-DD" autocomplete="off"></p>
+		<p class="logging-intro">Period, medication, and miscellaneous tracker entries for one date live together here. Management of medication and tracker definitions remains below.</p>
+		<div class="logging-date-row"><label for="tracker-log-date">Logging date:</label> <input type="text" id="tracker-log-date" data-date-input inputmode="numeric" placeholder="YYYY-MM-DD" autocomplete="off"></div>
+		<div class="logging-panels">
+			<section class="logging-panel logging-period-panel">
+				<h4>Period</h4>
+				<p><label for="period-start">Period start date:</label> <input type="text" id="period-start" data-date-input inputmode="numeric" placeholder="YYYY-MM-DD" autocomplete="off" required></p>
+				<p><label for="period-end">Period end date (optional):</label> <input type="text" id="period-end" data-date-input inputmode="numeric" placeholder="YYYY-MM-DD" autocomplete="off"></p>
+				<p><label class="chip-toggle"><input type="checkbox" id="period-exceptional"> Mark as an exceptional cycle</label></p>
+				<p><button type="submit" class="btn-primary" disabled>Save period</button></p>
+			</section>
+			<section class="logging-panel today-dose-log">
+				<h4>Medication</h4>
+				<p class="privacy-note">Tap a dose to mark it taken on the logging date.</p>
+				<div id="today-medication-log" class="dose-grid"></div>
+			</section>
+			<section class="logging-panel today-tracker-log">
+				<h4>Miscellaneous trackers</h4>
+				<p class="privacy-note">Select any combination and log them together for the logging date.</p>
 			<div id="today-tracker-log" class="tracker-checklist"></div>
 			<p><label for="tracker-log-note">Shared note (optional):</label> <textarea id="tracker-log-note" maxlength="500"></textarea></p>
 			<p><button type="button" id="log-trackers-btn" class="btn-primary">Log selected trackers</button></p>
+			</section>
 		</div>
 	</section>
 
@@ -265,11 +270,17 @@ window.addEventListener("unhandledrejection",evt => {
 		</div>
 		<ul class="calendar-legend">
 			<li><img src="/assets/sprite-6-1.png" alt="" aria-hidden="true"> Period day</li>
+			<li><span class="calendar-legend-swatch" aria-hidden="true"></span> Predicted cycle</li>
 			<li><img class="projected-period-icon" src="/assets/calendar-paw-icon.png" alt="" aria-hidden="true"> Projected period</li>
 			<li><img src="/assets/moon-icon-full-cyan.png" alt="" aria-hidden="true"> Est. ovulation</li>
 			<li><img src="/assets/sprite-8-6.png" alt="" aria-hidden="true"> Medication dose</li>
 			<li><img src="/assets/misc-tracking/paw-print-motif-cyan.png" alt="" aria-hidden="true"> Tracker activity</li>
 		</ul>
+		<section id="selected-day-summary" class="selected-day-summary" aria-live="polite" aria-labelledby="selected-day-heading">
+			<h4 id="selected-day-heading">Selected day</h4>
+			<div id="selected-day-content"></div>
+			<button type="button" id="selected-day-log-btn" class="btn-primary">Log this date</button>
+		</section>
 		<p class="privacy-note">Predictions are estimates only — not contraception or medical advice. Confidence reflects how much consistent history is available.</p>
 	</section>
 
